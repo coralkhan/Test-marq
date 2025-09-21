@@ -55,6 +55,10 @@
         #chart-tooltip { opacity: 0; position: absolute; background: rgba(30, 41, 59, 0.9); color: white; border-radius: 8px; padding: 12px; pointer-events: none; transition: all 0.2s ease-in-out; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid #475569; backdrop-filter: blur(5px); width: 300px; max-width: 300px; font-size: 0.875rem; transform: translate(-50%, calc(-100% - 15px)); z-index: 100; }
         .modal-transition { transition: all 0.3s ease-in-out; }
         #question-image-container svg, #review-question-image-container svg { max-height: 200px; width: 100%; margin: 1rem auto; background: #f8fafc; border-radius: 0.5rem; padding: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        #question-text, #coding-problem-prompt {
+            overflow-wrap: break-word;
+            word-wrap: break-word; /* For older browsers */
+        }
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
@@ -392,8 +396,8 @@
                                 </div>
                                 <button onclick="calculateNormal()" class="btn-base bg-blue-600 w-full p-2 rounded-md text-white">Calculate</button>
                                 <div>
-                                     <label class="font-semibold">Result</label>
-                                     <div id="normal-result" class="mt-1 w-full bg-slate-200 dark:bg-slate-900 p-2 rounded-md min-h-[80px] text-text-primary space-y-1"></div>
+                                      <label class="font-semibold">Result</label>
+                                      <div id="normal-result" class="mt-1 w-full bg-slate-200 dark:bg-slate-900 p-2 rounded-md min-h-[80px] text-text-primary space-y-1"></div>
                                 </div>
                             </div>
                         </div>
@@ -524,7 +528,10 @@
                             java: `class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        // Write your code here\n    }\n}`
                         },
                         solution: {
-                            js: `function twoSum(nums, target) {\n    const map = new Map();\n    for (let i = 0; i < nums.length; i++) {\n        const complement = target - nums[i];\n        if (map.has(complement)) {\n            return [map.get(complement), i];\n        }\n        map.set(nums[i], i);\n    }\n}`
+                            js: `function twoSum(nums, target) {\n    const map = new Map();\n    for (let i = 0; i < nums.length; i++) {\n        const complement = target - nums[i];\n        if (map.has(complement)) {\n            return [map.get(complement), i];\n        }\n        map.set(nums[i], i);\n    }\n}`,
+                            py: `def two_sum(nums, target):\n    num_map = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in num_map:\n            return [num_map[complement], i]\n        num_map[num] = i`,
+                            cpp: `// Complete implementation inside the class method\nstd::unordered_map<int, int> num_map;\nfor (int i = 0; i < nums.size(); ++i) {\n    int complement = target - nums[i];\n    if (num_map.count(complement)) {\n        return {num_map[complement], i};\n    }\n    num_map[nums[i]] = i;\n}\nreturn {}; // Should not be reached`,
+                            java: `// Complete implementation inside the class method\nMap<Integer, Integer> numMap = new HashMap<>();\nfor (int i = 0; i < nums.length; i++) {\n    int complement = target - nums[i];\n    if (numMap.containsKey(complement)) {\n        return new int[] { numMap.get(complement), i };\n    }\n    numMap.put(nums[i], i);\n}\nthrow new IllegalArgumentException("No two sum solution");`
                         },
                         explanation: "This problem can be solved in a single pass using a hash map (or JavaScript's `Map`). We iterate through the array, and for each element, we calculate its 'complement' (the other number that would add up to the target). If the complement already exists in our map, we've found our pair and can return their indices. If not, we add the current number and its index to the map for future lookups. This approach has a time complexity of O(n) because we visit each element once, and map lookups are O(1) on average.",
                         testCases: [
@@ -553,7 +560,10 @@
                            java: `class Solution {\n    public boolean isValid(String s) {\n        // Write your code here\n    }\n}`
                         },
                         solution: {
-                            js: `function isValid(s) {\n    const stack = [];\n    const map = {\n        "(": ")",\n        "[": "]",\n        "{": "}"\n    };\n\n    for (let i = 0; i < s.length; i++) {\n        let c = s[i];\n        if (map[c]) {\n            stack.push(map[c]);\n        } else if (stack.length > 0 && stack[stack.length - 1] === c) {\n            stack.pop();\n        } else {\n            return false;\n        }\n    }\n\n    return stack.length === 0;\n}`
+                            js: `function isValid(s) {\n    const stack = [];\n    const map = {\n        "(": ")",\n        "[": "]",\n        "{": "}"\n    };\n\n    for (let i = 0; i < s.length; i++) {\n        let c = s[i];\n        if (map[c]) {\n            stack.push(map[c]);\n        } else if (stack.length > 0 && stack[stack.length - 1] === c) {\n            stack.pop();\n        } else {\n            return false;\n        }\n    }\n\n    return stack.length === 0;\n}`,
+                            py: `class Solution:\n    def isValid(self, s: str) -> bool:\n        stack = []\n        mapping = {")": "(", "}": "{", "]": "["}\n        for char in s:\n            if char in mapping:\n                top_element = stack.pop() if stack else '#'\n                if mapping[char] != top_element:\n                    return False\n            else:\n                stack.append(char)\n        return not stack`,
+                            cpp: `// Complete implementation inside the class method\nstd::stack<char> charStack;\nstd::unordered_map<char, char> mapping = {{')', '('}, {']', '['}, {'}', '{'}};\nfor (char c : s) {\n    if (mapping.count(c)) {\n        if (charStack.empty() || mapping[c] != charStack.top()) {\n            return false;\n        }\n        charStack.pop();\n    } else {\n        charStack.push(c);\n    }\n}\nreturn charStack.empty();`,
+                            java: `// Complete implementation inside the class method\nStack<Character> stack = new Stack<Character>();\nHashMap<Character, Character> map = new HashMap<Character, Character>();\nmap.put(')', '(');\nmap.put('}', '{');\nmap.put(']', '[');\nfor (char c : s.toCharArray()) {\n    if (map.containsKey(c)) {\n        if (stack.empty() || map.get(c) != stack.pop()) {\n            return false;\n        }\n    } else {\n        stack.push(c);\n    }\n}\nreturn stack.empty();`
                         },
                         explanation: "This is a classic problem for the Stack data structure. We iterate through the string. If we encounter an opening bracket, we push its corresponding closing bracket onto the stack. If we see a closing bracket, we check if the stack is empty or if the top of the stack matches the current bracket. If it matches, we pop from the stack, signifying a valid pair. If it doesn't match or the stack is empty, the string is invalid. Finally, after iterating through the whole string, the stack must be empty for the string to be considered valid.",
                         testCases: [
@@ -1879,9 +1889,9 @@
         document.getElementById('coding-console-output').textContent = 'Click "Run Tests" to check your code.';
         document.getElementById('run-code-btn').onclick = () => runUserCode();
         document.getElementById('show-solution-btn').onclick = () => {
+            const lang = currentQuizState.currentLanguage || 'js';
             solutionModal.explanation.innerHTML = problem.explanation;
-            // For now, only show JS solution. This can be expanded.
-            solutionModal.code.textContent = problem.solution.js;
+            solutionModal.code.textContent = problem.solution[lang] || "Solution not available for this language.";
             solutionModal.main.classList.remove('hidden');
         };
 
@@ -1912,6 +1922,7 @@
     }
 
     function switchEditorLanguage(langKey) {
+        currentQuizState.currentLanguage = langKey;
         const problem = currentQuizState.currentProblem;
         if (!problem) return;
 
@@ -1935,7 +1946,7 @@
         const sortIfNeeded = (item) => {
             if (Array.isArray(item)) {
                 // Create a copy to not mutate original test case data
-                return [...item].sort();
+                return [...item].sort((a, b) => a - b);
             }
             return item;
         }
@@ -1944,19 +1955,54 @@
 
     function runUserCode() {
         const userCode = codeMirrorEditor.getValue();
-        const { testCases, solution } = currentQuizState.currentProblem;
+        const { testCases } = currentQuizState.currentProblem;
         const consoleOutput = document.getElementById('coding-console-output');
         consoleOutput.innerHTML = '';
+        const currentLang = currentQuizState.currentLanguage;
+        const languages = { js: 'JavaScript', py: 'Python', cpp: 'C++', java: 'Java' };
 
-        // NOTE: For this front-end only app, we can only execute JavaScript.
-        // The logic for other languages is simulated by running the JS solution.
-        // A full implementation would require a backend execution environment.
+        // For non-JS languages, show a disclaimer and run a simulation with the JS solution
+        if (currentLang !== 'js') {
+             consoleOutput.innerHTML = `<div class="text-amber-400"><strong>Note:</strong> Live execution for ${languages[currentLang]} is not supported in this browser environment. Running a simulated check against the correct solution to demonstrate expected behavior.</div><hr class="my-2 border-slate-600">`;
+             // Simulate using the JS solution
+             const { solution } = currentQuizState.currentProblem;
+             testCases.forEach((testCase, index) => {
+                 try {
+                     const funcName = solution.js.match(/function\s+([a-zA-Z0-9_]+)\s*\(/)[1];
+                     const func = new Function(`return ${solution.js}`)();
+                     const actualOutput = func(...Object.values(testCase.input));
+                     const passed = deepEqual(actualOutput, testCase.expectedOutput);
+                     const resultClass = passed ? 'pass' : 'fail';
+                     consoleOutput.innerHTML += `<div class="${resultClass}"><strong>Test Case ${index + 1}: ${passed ? 'Passed' : 'Failed'} (Simulated)</strong></div>`;
+                     if(!passed){
+                        consoleOutput.innerHTML += `<div class="text-xs pl-4">Expected: ${JSON.stringify(testCase.expectedOutput)}, Got: ${JSON.stringify(actualOutput)}</div>`;
+                     }
+                 } catch (error) {
+                      consoleOutput.innerHTML += `<div class="fail"><strong>Test Case ${index + 1}: Simulation Error</strong></div><div class="text-xs pl-4">${error}</div>`;
+                 }
+             });
+             return;
+        }
+
+        // --- Real JavaScript Execution ---
         let allPassed = true;
+        const functionNameMatch = userCode.match(/function\s+([a-zA-Z0-9_]+)\s*\(/);
+        
+        if (!functionNameMatch) {
+            consoleOutput.innerHTML = `<div class="fail"><strong>Execution Error:</strong> Could not find a function definition. Please use the standard "function yourFunctionName(...) {...}" format.</div>`;
+            if(audioInitialized) incorrectSynth.triggerAttackRelease('A2', '8n');
+            return;
+        }
+        const functionName = functionNameMatch[1];
+
         testCases.forEach((testCase, index) => {
             try {
-                // We use the provided JS solution to get the correct function logic
-                const func = new Function(...Object.keys(testCase.input), `${solution.js}\nreturn twoSum(...arguments) || isValid(...arguments);`);
-                const actualOutput = func(...Object.values(testCase.input));
+                // This creates the function from the user's code string in a safe scope
+                const userFunc = new Function(`${userCode}\nreturn ${functionName};`)();
+                
+                // We need to clone the input to prevent the user's function from modifying the original test case data
+                const inputClone = JSON.parse(JSON.stringify(Object.values(testCase.input)));
+                const actualOutput = userFunc(...inputClone);
                 
                 const passed = deepEqual(actualOutput, testCase.expectedOutput);
                 if (!passed) allPassed = false;
@@ -1964,12 +2010,11 @@
                 const resultClass = passed ? 'pass' : 'fail';
                 consoleOutput.innerHTML += `<div class="${resultClass}"><strong>Test Case ${index + 1}: ${passed ? 'Passed' : 'Failed'}</strong></div>`;
                 if(!passed){
-                   consoleOutput.innerHTML += `<div class="text-xs pl-4">Expected: ${JSON.stringify(testCase.expectedOutput)}, Got: ${JSON.stringify(actualOutput)}</div>`;
+                    consoleOutput.innerHTML += `<div class="text-xs pl-4">Expected: ${JSON.stringify(testCase.expectedOutput)}, Got: ${JSON.stringify(actualOutput)}</div>`;
                 }
-
             } catch (error) {
                 allPassed = false;
-                consoleOutput.innerHTML += `<div class="fail"><strong>Test Case ${index + 1}: Error</strong></div>`;
+                consoleOutput.innerHTML += `<div class="fail"><strong>Test Case ${index + 1}: Runtime Error</strong></div>`;
                 consoleOutput.innerHTML += `<div class="text-xs pl-4">${error}</div>`;
             }
         });
@@ -2028,4 +2073,3 @@ Provide a concise, encouraging analysis in markdown format.
 </script>
 </body>
 </html>
-
