@@ -1,0 +1,2031 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Electronics & DSA Study Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <!-- CodeMirror Assets -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/darcula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #111827; --bg-card: rgba(30, 41, 59, 0.6); --text-primary: #e5e7eb; --text-secondary: #9ca3af; --border-color: #374151;
+        }
+        html.light {
+            --bg-main: #f3f4f6; --bg-card: rgba(255, 255, 255, 0.8); --text-primary: #1f2937; --text-secondary: #4b5563; --border-color: #d1d5db;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-primary); transition: background-color 0.3s, color 0.3s; }
+        .app-container { position: relative; }
+        .container-view { 
+            background-color: var(--bg-card); 
+            border: 1px solid var(--border-color); 
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; 
+            width: 100%; 
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+        }
+        html.light .container-view {
+             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+        .hidden-view { opacity: 0; transform: scale(0.98); pointer-events: none; position: absolute; top: 0; left: 0; }
+        .visible-view { opacity: 1; transform: scale(1); pointer-events: auto; position: relative; }
+        .btn-base { transition: all 0.2s ease-in-out; }
+        .btn-base:hover:not(:disabled) { transform: scale(1.05) translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .btn-base:disabled { transform: none; box-shadow: none; opacity: 0.5; cursor: not-allowed; }
+        .option-btn.selected { background-color: #4f46e5; border-color: #a5b4fc; color: white; }
+        html.light .option-btn.selected { color: white; }
+        .difficulty-btn.selected { box-shadow: 0 0 0 3px #a5b4fc; transform: scale(1.05); }
+        @keyframes gradient-animation { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        html.dark body { background: linear-gradient(-45deg, #1f2937, #111827, #374151, #1e293b); background-size: 400% 400%; animation: gradient-animation 15s ease infinite; }
+        html.light body { background: linear-gradient(-45deg, #e0e7ff, #c7d2fe, #a5b4fc, #818cf8); background-size: 400% 400%; animation: gradient-animation 20s ease infinite; }
+        #progress-bar-fill { transition: width 0.5s ease-out; }
+        #chart-tooltip { opacity: 0; position: absolute; background: rgba(30, 41, 59, 0.9); color: white; border-radius: 8px; padding: 12px; pointer-events: none; transition: all 0.2s ease-in-out; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid #475569; backdrop-filter: blur(5px); width: 300px; max-width: 300px; font-size: 0.875rem; transform: translate(-50%, calc(-100% - 15px)); z-index: 100; }
+        .modal-transition { transition: all 0.3s ease-in-out; }
+        #question-image-container svg, #review-question-image-container svg { max-height: 200px; width: 100%; margin: 1rem auto; background: #f8fafc; border-radius: 0.5rem; padding: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .animate-shake { animation: shake 0.5s ease-in-out; }
+        .tts-button { cursor: pointer; transition: color 0.2s; }
+        .tts-button:hover { color: #60a5fa; }
+        .tts-button.loading { animation: pulse 1.5s infinite; color: #f59e0b; cursor: wait; }
+        .tts-button.played { color: #4ade80; cursor: default; }
+        .calc-btn { transition: background-color 0.2s; }
+        .calc-btn:hover { background-color: rgba(255,255,255,0.1); }
+        .calc-btn.op { background-color: #f59e0b; color: white; }
+        .calc-btn.op:hover { background-color: #fbbf24; }
+        .calc-mode-btn { padding: 0.5rem 1rem; border: none; background: transparent; color: var(--text-secondary); border-bottom: 2px solid transparent; }
+        .calc-mode-btn.selected { color: var(--text-primary); border-bottom-color: #3b82f6; font-weight: 600; }
+        #coding-console-output .pass { color: #4ade80; }
+        #coding-console-output .fail { color: #f87171; }
+        .lang-btn { padding: 0.25rem 0.75rem; border-radius: 0.375rem; background-color: var(--border-color); color: var(--text-secondary); font-size: 0.8rem; }
+        .lang-btn.selected { background-color: #4f46e5; color: white; font-weight: 600; }
+        .CodeMirror { height: 100%; font-family: 'Courier New', Courier, monospace; border: 1px solid var(--border-color); border-radius: 0.5rem; }
+        .CodeMirror-gutters { background: #1e293b !important; border-right: 1px solid var(--border-color); }
+        html.light .CodeMirror { border-color: #d1d5db; }
+        html.light .CodeMirror-gutters { background: #f3f4f6 !important; }
+        .CodeMirror.cm-s-darcula { background: #282c34; color: #abb2bf; }
+        html.light .CodeMirror.cm-s-darcula { background: #fafafa; color: #383a42; }
+        html.light .cm-s-darcula .CodeMirror-gutters { background: #f3f4f6; color: #a0a1a7; }
+        html.light .cm-s-darcula .CodeMirror-cursor { border-left: 1px solid #528bff; }
+        html.light .cm-s-darcula .cm-keyword { color: #a626a4; }
+        html.light .cm-s-darcula .cm-operator { color: #383a42; }
+        html.light .cm-s-darcula .cm-variable-2, html.light .cm-s-darcula .cm-def { color: #e45649; }
+        html.light .cm-s-darcula .cm-variable-3, html.light .cm-s-darcula .cm-type { color: #c99100; }
+        html.light .cm-s-darcula .cm-comment { color: #a0a1a7; }
+        html.light .cm-s-darcula .cm-string { color: #50a14f; }
+        html.light .cm-s-darcula .cm-number { color: #986801; }
+        html.light .cm-s-darcula .cm-property { color: #4078f2; }
+        html.light .cm-s-darcula .cm-atom { color: #986801; }
+    </style>
+</head>
+<body>
+    <div class="absolute top-4 right-4 z-10">
+        <button id="theme-toggle" class="btn-base bg-slate-300/50 dark:bg-slate-700/50 p-2 rounded-full text-slate-800 dark:text-yellow-300">
+            <svg id="theme-icon-sun" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+            <svg id="theme-icon-moon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+        </button>
+    </div>
+    <div class="min-h-screen w-full flex items-center justify-center p-4">
+        <div class="w-full max-w-7xl mx-auto app-container">
+            <!-- Subject Select Screen -->
+            <div id="subject-select-container" class="container-view visible-view backdrop-blur-sm p-8 rounded-xl shadow-2xl text-center">
+                <h1 class="text-4xl font-bold text-blue-400">Electronics & DSA Study Tool</h1>
+                <p class="mt-4 text-text-secondary">Select a subject to begin or view your history.</p>
+                <div id="subject-buttons-container" class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-white">
+                    <!-- Subjects will be dynamically inserted here -->
+                </div>
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-white">
+                    <button id="study-mistakes-btn" onclick="startIncorrectReviewQuiz()" class="btn-base bg-amber-600 p-4 rounded-lg font-semibold hidden">Study Previous Mistakes</button>
+                    <button id="view-history-btn" class="btn-base bg-slate-600 p-4 rounded-lg font-semibold col-span-full">View Quiz History</button>
+                </div>
+            </div>
+            
+            <!-- Module Select Screen -->
+            <div id="module-select-container" class="container-view hidden-view backdrop-blur-sm p-8 rounded-xl shadow-2xl text-center">
+                <h1 id="module-select-title" class="text-4xl font-bold text-blue-400"></h1>
+                <p class="mt-4 text-text-secondary">Select a module to continue.</p>
+                <div id="module-buttons-container" class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 text-white">
+                     <!-- Modules will be dynamically inserted here -->
+                </div>
+                 <button id="back-to-subjects-btn" class="mt-8 text-slate-400 hover:text-white dark:hover:text-text-primary transition-colors">&larr; Back to Subjects</button>
+            </div>
+
+            <!-- Quiz Type Select Screen (for DSA) -->
+            <div id="quiz-type-container" class="container-view hidden-view backdrop-blur-sm p-8 rounded-xl shadow-2xl text-center">
+                <h1 id="quiz-type-title" class="text-4xl font-bold text-purple-400"></h1>
+                <p class="mt-4 text-text-secondary">How would you like to practice?</p>
+                <div id="quiz-type-buttons-container" class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 text-white">
+                     <!-- Quiz type buttons will be inserted here -->
+                </div>
+                 <button id="back-to-modules-from-type-btn" class="mt-8 text-slate-400 hover:text-white dark:hover:text-text-primary transition-colors">&larr; Back to Modules</button>
+            </div>
+    
+            <!-- History Screen -->
+            <div id="history-container" class="container-view hidden-view backdrop-blur-sm p-8 rounded-xl shadow-2xl">
+                <h1 class="text-3xl font-bold text-blue-400">Quiz History</h1>
+                <div id="history-list" class="mt-6 space-y-3 max-h-96 overflow-y-auto p-2"></div>
+                <div class="mt-6 flex justify-between">
+                    <button id="back-to-subjects-from-history-btn" class="btn-base bg-slate-600 p-3 rounded-lg font-semibold text-white">&larr; Back to Subjects</button>
+                    <button id="clear-history-btn" onclick="clearHistory()" class="btn-base bg-red-700 p-3 rounded-lg font-semibold text-white">Clear History</button>
+                </div>
+            </div>
+    
+            <!-- Start Screen -->
+            <div id="start-container" class="container-view hidden-view backdrop-blur-sm p-8 rounded-xl shadow-2xl text-center">
+                <h1 id="start-title" class="text-4xl font-bold"></h1>
+                <p id="start-subtitle" class="mt-4 text-text-secondary"></p>
+                <div id="difficulty-selector" class="mt-8 flex justify-center gap-2 flex-wrap text-white">
+                    <button onclick="selectDifficulty('all')" class="btn-base difficulty-btn bg-indigo-600 p-3 rounded-lg font-semibold">All</button>
+                    <button onclick="selectDifficulty('easy')" class="btn-base difficulty-btn bg-green-600 p-3 rounded-lg font-semibold">Easy</button>
+                    <button onclick="selectDifficulty('medium')" class="btn-base difficulty-btn bg-yellow-600 p-3 rounded-lg font-semibold">Medium</button>
+                    <button onclick="selectDifficulty('hard')" class="btn-base difficulty-btn bg-red-600 p-3 rounded-lg font-semibold">Hard</button>
+                </div>
+                 <div id="question-count-selector" class="mt-8 grid grid-cols-2 md:grid-cols-3 gap-4 items-center text-white">
+                    <!-- Buttons are dynamically generated here -->
+                </div>
+                <button id="back-to-modules-from-start-btn" class="mt-6 text-slate-400 hover:text-white dark:hover:text-text-primary transition-colors">&larr; Back to Modules</button>
+            </div>
+    
+            <!-- Quiz Container -->
+            <div id="quiz-container" class="container-view hidden-view backdrop-blur-sm p-6 md:p-8 rounded-xl shadow-2xl">
+                <div class="flex justify-between items-center text-sm text-text-secondary mb-2">
+                    <span id="question-counter"></span>
+                    <div class="flex items-center gap-4">
+                         <button id="tools-button" onclick="openToolsModal()" class="btn-base bg-gray-600/50 px-3 py-1 rounded-lg font-semibold text-sm hidden">🛠️ Tools</button>
+                        <span id="timer" class="font-mono">00:00</span>
+                    </div>
+                </div>
+                <div id="progress-bar" class="w-full bg-slate-300 dark:bg-slate-700 rounded-full h-2"><div id="progress-bar-fill" class="bg-blue-500 h-2 rounded-full"></div></div>
+                <div id="question-image-container" class="mt-4"></div>
+                <h2 class="text-2xl md:text-3xl font-bold mt-4" id="question-text"></h2>
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6"></div>
+                <div id="hint-container" class="mt-4 p-3 rounded-lg bg-amber-100 dark:bg-slate-900/80 text-amber-800 dark:text-amber-300 hidden"></div>
+                <div id="feedback-container" class="mt-6 p-4 rounded-lg bg-slate-200/80 dark:bg-slate-700/80 hidden"></div>
+                
+                <div id="quiz-controls" class="mt-6 flex flex-wrap gap-4 items-center justify-between text-white">
+                    <button id="hint-button" onclick="showHint()" class="btn-base bg-yellow-600 px-4 py-2 rounded-lg font-semibold text-sm">💡 Get a Hint</button>
+                    <div id="confidence-controls" class="flex gap-2 hidden">
+                        <button onclick="submitAnswer('guess')" class="btn-base bg-slate-600 px-4 py-2 rounded-lg font-semibold">Submit (Guess)</button>
+                        <button onclick="submitAnswer('confident')" class="btn-base bg-green-600 px-4 py-2 rounded-lg font-semibold">Submit (Confident)</button>
+                    </div>
+                </div>
+                <button id="next-button" class="mt-6 w-full btn-base bg-gradient-to-r from-blue-600 to-indigo-600 font-bold py-3 px-4 rounded-lg hidden text-white"></button>
+                <div class="text-xs text-slate-500 text-center mt-4 pt-2 border-t border-slate-300/50 dark:border-slate-700/50">
+                    <b>Shortcuts:</b> <b>1-4</b> to select, <b>Enter</b> (Confident), <b>Space</b> (Guess), <b>Shift+Enter</b> (Next), <b>/</b> (Notes)
+                </div>
+            </div>
+    
+            <!-- Coding Challenge Container -->
+            <div id="coding-challenge-container" class="container-view hidden-view backdrop-blur-sm p-6 md:p-8 rounded-xl shadow-2xl w-full">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[80vh]">
+                    <!-- Left Panel: Problem Description -->
+                    <div class="flex flex-col h-full">
+                        <h2 id="coding-problem-title" class="text-2xl font-bold text-purple-400"></h2>
+                        <div id="coding-problem-prompt" class="prose prose-invert mt-4 overflow-y-auto pr-4 text-text-secondary flex-grow"></div>
+                        <button id="back-to-problems-btn" class="mt-4 text-slate-400 hover:text-white dark:hover:text-text-primary transition-colors self-start">&larr; Back to Problems</button>
+                    </div>
+
+                    <!-- Right Panel: Editor and Console -->
+                    <div class="flex flex-col h-full">
+                        <div class="flex-grow flex flex-col">
+                            <div class="flex items-center justify-between mb-2">
+                                <label for="coding-editor" class="text-sm font-semibold text-text-secondary">Your Code:</label>
+                                <div id="language-selector" class="flex gap-2"></div>
+                            </div>
+                            <textarea id="coding-editor" class="hidden"></textarea>
+                        </div>
+                        <div class="flex-shrink-0 h-1/3 flex flex-col mt-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-semibold text-text-secondary">Console:</label>
+                                <div class="flex gap-2">
+                                    <button id="run-code-btn" class="btn-base bg-green-600 px-4 py-2 rounded-lg font-semibold text-sm text-white">Run Tests</button>
+                                    <button id="show-solution-btn" class="btn-base bg-blue-600 px-4 py-2 rounded-lg font-semibold text-sm text-white">Show Solution</button>
+                                </div>
+                            </div>
+                            <pre id="coding-console-output" class="w-full flex-grow bg-slate-900 text-slate-300 text-sm rounded-lg p-4 border border-slate-700 overflow-y-auto whitespace-pre-wrap"></pre>
+                        </div>
+                    </div>
+                </div>
+                 <div id="solution-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
+                    <div class="relative border rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col bg-slate-800 border-slate-600">
+                        <div class="flex justify-between items-center p-4 border-b border-slate-700">
+                            <h3 class="text-xl font-bold text-blue-400">Solution & Explanation</h3>
+                            <button id="solution-modal-close" class="text-slate-400 hover:text-white text-3xl leading-none">&times;</button>
+                        </div>
+                        <div class="p-6 overflow-y-auto">
+                            <h4 class="font-bold text-lg text-slate-300">Explanation:</h4>
+                            <div id="solution-explanation" class="prose prose-invert mt-2 mb-4 text-text-secondary"></div>
+                            <h4 class="font-bold text-lg text-slate-300">Code:</h4>
+                            <pre id="solution-code" class="mt-2 bg-slate-900 text-slate-300 text-sm rounded-lg p-4 border border-slate-700 overflow-x-auto"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Container -->
+            <div id="results-container" class="container-view hidden-view backdrop-blur-sm p-8 rounded-xl shadow-2xl">
+                <h2 class="text-4xl font-bold text-blue-400 text-center">Quiz Complete!</h2>
+                <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div class="bg-slate-200 dark:bg-slate-700 p-3 rounded-lg"><p class="text-text-secondary text-sm">Score</p><p class="text-2xl font-bold" id="score-text"></p></div>
+                    <div class="bg-slate-200 dark:bg-slate-700 p-3 rounded-lg"><p class="text-text-secondary text-sm">Total Time</p><p class="text-2xl font-bold" id="total-time-text"></p></div>
+                    <div class="bg-slate-200 dark:bg-slate-700 p-3 rounded-lg"><p class="text-text-secondary text-sm">Avg. Time</p><p class="text-2xl font-bold" id="avg-time-text"></p></div>
+                    <div class="bg-slate-200 dark:bg-slate-700 p-3 rounded-lg"><p class="text-text-secondary text-sm">Confidence</p><p class="text-2xl font-bold" id="confidence-text"></p></div>
+                </div>
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-slate-700/50 p-4 rounded-lg relative h-80">
+                        <h3 class="font-bold text-xl mb-2 text-center">Performance Analysis</h3>
+                        <canvas id="performance-chart"></canvas>
+                        <div id="chart-tooltip"></div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-700/50 p-4 rounded-lg">
+                        <h3 class="font-bold text-xl mb-2 text-center">Score by Category</h3>
+                        <div id="category-scores-container" class="space-y-2 max-h-72 overflow-y-auto p-2"></div>
+                    </div>
+                </div>
+                <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-white">
+                     <button id="review-incorrect-button" class="btn-base w-full bg-gradient-to-r from-amber-500 to-orange-500 font-bold py-3 px-6 rounded-lg hidden">Review Incorrect</button>
+                     <button id="save-mistakes-button" onclick="saveMistakesForLater()" class="btn-base w-full bg-gradient-to-r from-yellow-500 to-amber-500 font-bold py-3 px-6 rounded-lg hidden">Study Mistakes Later</button>
+                     <button id="get-ai-analysis-button" onclick="getAiAnalysis()" class="btn-base w-full bg-gradient-to-r from-purple-500 to-violet-500 font-bold py-3 px-6 rounded-lg col-span-full">Get AI Analysis</button>
+                </div>
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-white">
+                     <button id="download-pdf-button" onclick="downloadPdfReport()" class="btn-base w-full bg-gradient-to-r from-green-500 to-emerald-500 font-bold py-3 px-6 rounded-lg">Download Report Card</button>
+                     <button id="back-to-subjects-from-results-btn" class="btn-base w-full bg-gradient-to-r from-slate-600 to-slate-700 font-bold py-3 px-6 rounded-lg">Back to Subjects</button>
+                </div>
+            </div>
+            
+            <!-- Review Container -->
+            <div id="review-container" class="container-view hidden-view backdrop-blur-sm p-6 md:p-8 rounded-xl shadow-2xl">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl md:text-3xl font-bold" id="review-question-text"></h2>
+                    <span id="review-progress" class="text-sm text-text-secondary font-mono"></span>
+                </div>
+                <p class="text-text-secondary text-sm mt-1" id="review-question-category"></p>
+                <div id="review-question-image-container" class="mt-4"></div>
+                <div id="review-options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6"></div>
+                <div id="review-feedback-container" class="mt-6 p-4 rounded-lg bg-slate-200 dark:bg-slate-700">
+                    <h3 id="review-feedback-title" class="font-bold text-lg"></h3>
+                    <div id="review-feedback-explanation-wrapper" class="mt-2"></div>
+                    <div id="review-notes-container" class="mt-4 hidden">
+                        <h4 class="font-bold text-md text-amber-600 dark:text-amber-300">Your Notes:</h4>
+                        <p id="review-notes-text" class="mt-1 p-3 bg-slate-300/50 dark:bg-slate-900/50 rounded-lg whitespace-pre-wrap"></p>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-between items-center gap-4 text-white">
+                    <button id="review-prev-button" class="btn-base w-1/2 bg-slate-600 font-bold py-3 px-4 rounded-lg">&larr; Previous</button>
+                    <button id="review-next-button" class="btn-base w-1/2 bg-slate-600 font-bold py-3 px-4 rounded-lg">Next &rarr;</button>
+                </div>
+                <button id="back-to-results-button" class="mt-4 w-full btn-base bg-gradient-to-r from-slate-500 to-slate-600 font-bold py-3 px-4 rounded-lg text-white">Back to Results</button>
+            </div>
+    
+            <!-- Modals Container -->
+            <div id="ai-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div id="ai-modal-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm modal-transition"></div>
+                <div id="ai-modal-content" class="relative border rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col modal-transition bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600">
+                    <div class="flex justify-between items-center p-4 border-b border-slate-300 dark:border-slate-700">
+                        <h3 class="text-xl font-bold text-violet-600 dark:text-violet-400 flex items-center">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.636-6.364l.707.707M19.071 19.071l-.707-.707M4.929 4.929l.707.707"></path></svg>
+                            AI Performance Analysis
+                        </h3>
+                        <button id="ai-modal-close" class="text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white text-3xl leading-none">&times;</button>
+                    </div>
+                    <div id="ai-analysis-content" class="p-6 overflow-y-auto space-y-4 text-text-primary dark:text-text-secondary"></div>
+                </div>
+            </div>
+            
+            <div id="tools-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div id="tools-modal-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm modal-transition"></div>
+                <div id="tools-modal-content" class="relative border rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col modal-transition bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600">
+                    <div class="flex justify-between items-center p-4 border-b border-slate-300 dark:border-slate-700">
+                        <h3 id="tools-modal-title" class="text-xl font-bold text-sky-600 dark:text-sky-400 flex items-center"></h3>
+                        <button id="tools-modal-close" class="text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white text-3xl leading-none">&times;</button>
+                    </div>
+                    <div class="p-4 overflow-y-auto">
+                        <!-- Calculator Tool -->
+                        <div id="calculator-tool" class="hidden">
+                             <div class="flex mb-4 border-b border-slate-300 dark:border-slate-600">
+                                 <button onclick="switchCalcMode('standard')" class="calc-mode-btn selected">Standard</button>
+                                 <button onclick="switchCalcMode('matrix')" class="calc-mode-btn">Matrix</button>
+                                 <button onclick="switchCalcMode('normal')" class="calc-mode-btn">Normal Dist.</button>
+                            </div>
+                            <!-- Standard Calculator -->
+                            <div id="calc-standard" class="calc-mode-content">
+                                <div class="bg-slate-200 dark:bg-slate-900 p-4 rounded-lg">
+                                    <input type="text" id="calc-display" class="w-full bg-white dark:bg-slate-800 text-right text-3xl p-3 rounded-md mb-4 text-text-primary" readonly>
+                                    <div class="grid grid-cols-4 gap-2 text-white font-bold text-xl">
+                                        <button onclick="calcClear()" class="calc-btn op col-span-2 p-4 rounded-md">C</button>
+                                        <button onclick="calcBackspace()" class="calc-btn op p-4 rounded-md">⌫</button>
+                                        <button onclick="calcAppend('/')" class="calc-btn op p-4 rounded-md">/</button>
+                                        <button onclick="calcAppend('7')" class="calc-btn p-4 rounded-md bg-slate-400 dark:bg-slate-700 text-slate-800 dark:text-white">7</button>
+                                        <button onclick="calcAppend('8')" class="calc-btn p-4 rounded-md bg-slate-400 dark:bg-slate-700 text-slate-800 dark:text-white">8</button>
+                                        <button onclick="calcAppend('9')" class="calc-btn p-4 rounded-md bg-slate-400 dark:bg-slate-700 text-slate-800 dark:text-white">9</button>
+                                        <button onclick="calcAppend('*')" class="calc-btn op p-4 rounded-md">*</button>
+                                        <button onclick="calcAppend('4')" class="calc-btn p-4 rounded-md bg-slate-400 dark:bg-slate-700 text-slate-800 dark:text-white">4</button>
+                                        <button onclick="calcAppend('5')" class="calc-btn p-4 rounded-md bg-slate-400 dark:bg-slate-700 text-slate-800 dark:text-white">5</button>
+                                        <button onclick="calcAppend('6')" class="calc-btn p-4 rounded-md bg-slate-400 dark:bg-slate-700 text-slate-800 dark:text-white">6</button>
+                                        <button onclick="calcAppend('-')" class="calc-btn op p-4 rounded-md">-</button>
+                                        <button onclick="calcAppend('1')" class="calc-btn p-4 rounded-md bg-slate-400 dark:bg-slate-700 text-slate-800 dark:text-white">1</button>
+                                        <button onclick="calcAppend('2')" class="calc-btn p-4 rounded-md bg-slate-400 dark:bg-slate-700 text-slate-800 dark:text-white">2</button>
+                                        <button onclick="calcAppend('3')" class="calc-btn p-4 rounded-md bg-slate-400 dark:bg-slate-700 text-slate-800 dark:text-white">3</button>
+                                        <button onclick="calcAppend('+')" class="calc-btn op p-4 rounded-md">+</button>
+                                        <button onclick="calcAppend('0')" class="calc-btn col-span-2 p-4 rounded-md bg-slate-400 dark:bg-slate-700 text-slate-800 dark:text-white">0</button>
+                                        <button onclick="calcAppend('.')" class="calc-btn p-4 rounded-md bg-slate-400 dark:bg-slate-700 text-slate-800 dark:text-white">.</button>
+                                        <button onclick="calcResult()" class="calc-btn op p-4 rounded-md">=</button>
+                                    </div>
+                                </div>
+                            </div>
+                             <!-- Matrix Calculator -->
+                            <div id="calc-matrix" class="calc-mode-content hidden space-y-3 text-sm">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label for="matrixA" class="font-semibold">Matrix A</label>
+                                        <textarea id="matrixA" rows="4" class="mt-1 w-full bg-white dark:bg-slate-900 p-2 rounded-md font-mono text-text-primary" placeholder="1, 2, 3&#10;4, 5, 6"></textarea>
+                                    </div>
+                                    <div>
+                                        <label for="matrixB" class="font-semibold">Matrix B</label>
+                                        <textarea id="matrixB" rows="4" class="mt-1 w-full bg-white dark:bg-slate-900 p-2 rounded-md font-mono text-text-primary" placeholder="7, 8&#10;9, 10&#10;11, 12"></textarea>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-2">
+                                     <button onclick="matrixOp('add')" class="btn-base bg-blue-600 p-2 rounded-md text-white">A + B</button>
+                                     <button onclick="matrixOp('sub')" class="btn-base bg-blue-600 p-2 rounded-md text-white">A - B</button>
+                                     <button onclick="matrixOp('mul')" class="btn-base bg-blue-600 p-2 rounded-md text-white">A * B</button>
+                                     <button onclick="matrixOp('detA')" class="btn-base bg-indigo-600 p-2 rounded-md text-white">det(A)</button>
+                                     <button onclick="matrixOp('invA')" class="btn-base bg-indigo-600 p-2 rounded-md text-white">inv(A)</button>
+                                </div>
+                                <div>
+                                     <label class="font-semibold">Result</label>
+                                     <pre id="matrix-result" class="mt-1 w-full bg-slate-200 dark:bg-slate-900 p-2 rounded-md min-h-[100px] text-text-primary whitespace-pre-wrap"></pre>
+                                </div>
+                            </div>
+                            <!-- Normal Distribution Calculator -->
+                            <div id="calc-normal" class="calc-mode-content hidden space-y-3 text-sm">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label for="normal-mean" class="font-semibold">Mean (μ)</label>
+                                        <input type="number" id="normal-mean" value="0" class="mt-1 w-full bg-white dark:bg-slate-900 p-2 rounded-md font-mono text-text-primary">
+                                    </div>
+                                     <div>
+                                        <label for="normal-stddev" class="font-semibold">Std Dev (σ)</label>
+                                        <input type="number" id="normal-stddev" value="1" min="0" class="mt-1 w-full bg-white dark:bg-slate-900 p-2 rounded-md font-mono text-text-primary">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="normal-x" class="font-semibold">Value (x)</label>
+                                    <input type="number" id="normal-x" value="1.96" class="mt-1 w-full bg-white dark:bg-slate-900 p-2 rounded-md font-mono text-text-primary">
+                                </div>
+                                <button onclick="calculateNormal()" class="btn-base bg-blue-600 w-full p-2 rounded-md text-white">Calculate</button>
+                                <div>
+                                     <label class="font-semibold">Result</label>
+                                     <div id="normal-result" class="mt-1 w-full bg-slate-200 dark:bg-slate-900 p-2 rounded-md min-h-[80px] text-text-primary space-y-1"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Number Converter Tool -->
+                        <div id="converter-tool" class="hidden space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-text-secondary">Decimal</label>
+                                <input type="text" id="conv-dec" oninput="convertFrom('dec')" class="mt-1 block w-full rounded-md bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 p-2 text-text-primary">
+                            </div>
+                             <div>
+                                <label class="block text-sm font-medium text-text-secondary">Binary</label>
+                                <input type="text" id="conv-bin" oninput="convertFrom('bin')" class="mt-1 block w-full rounded-md bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 p-2 text-text-primary">
+                            </div>
+                             <div>
+                                <label class="block text-sm font-medium text-text-secondary">Hexadecimal</label>
+                                <input type="text" id="conv-hex" oninput="convertFrom('hex')" class="mt-1 block w-full rounded-md bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 p-2 text-text-primary">
+                            </div>
+                             <div>
+                                <label class="block text-sm font-medium text-text-secondary">Octal</label>
+                                <input type="text" id="conv-oct" oninput="convertFrom('oct')" class="mt-1 block w-full rounded-md bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 p-2 text-text-primary">
+                            </div>
+                        </div>
+                          <!-- Formula Sheet Tool -->
+                        <div id="formula-tool" class="hidden text-text-primary space-y-4">
+                            <h4 class="font-bold text-lg">Key Formulas</h4>
+                            <div id="formula-content" class="text-sm bg-slate-200/50 dark:bg-slate-900/50 p-3 rounded-lg max-h-80 overflow-y-auto"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+<script>
+    // --- DATA ---
+    const allSubjects = {
+    'analog-electronics': {
+        title: "Analog Electronics",
+        description: "Diodes, Transistors, and Op-Amps",
+        style: "from-blue-600 to-indigo-600",
+        modules: {
+            'module1': { 
+                title: "Diode Circuits", 
+                questions: [
+                    { question: "Why is a diode called a 'unilateral' device?", options: ["It has two terminals.", "It follows Ohm's law.", "It conducts current in only one direction.", "It is made of silicon."], correctAnswer: "It conducts current in only one direction.", explanation: "The term unilateral means 'one-sided', referring to its property of allowing current to flow easily in only one direction.", category: "Diode Fundamentals", difficulty: "easy", hint: "Think about what 'uni' means, as in unicycle."},
+                    { question: "A Zener diode is primarily used for:", options: ["Amplification", "Rectification", "Voltage Regulation", "Oscillation"], correctAnswer: "Voltage Regulation", explanation: "Zener diodes are designed to operate in reverse breakdown, maintaining a stable voltage across them, making them ideal for voltage regulation.", category: "Special Diodes", difficulty: "easy", hint: "They create a stable reference voltage."},
+                    { question: "A 'clipper' circuit is used to:", options: ["Add a DC level", "Remove a portion of a signal above or below a certain level", "Smooth a DC signal", "Amplify a signal"], correctAnswer: "Remove a portion of a signal above or below a certain level", explanation: "Clipping circuits are used to prevent a signal's voltage from exceeding a certain level by 'clipping' off the peaks.", category: "Clippers & Clampers", difficulty: "medium", hint: "It 'cuts' the waveform."},
+                    { question: "In a full-wave bridge rectifier, how many diodes conduct during each half-cycle of the AC input?", options: ["One", "Two", "Four", "None"], correctAnswer: "Two", explanation: "In a bridge rectifier, a pair of diodes conducts during the positive half-cycle, and the other pair conducts during the negative half-cycle.", category: "Rectifiers", difficulty: "medium", hint: "Current needs a complete path through the bridge and the load."},
+                    { question: "What is the primary cause of 'Zener breakdown'?", options: ["High temperature", "Avalanche effect", "High intensity electric field across a narrow depletion region", "Forward bias current"], correctAnswer: "High intensity electric field across a narrow depletion region", explanation: "Zener breakdown occurs in heavily doped diodes where the reverse voltage creates an electric field strong enough to pull electrons from their valence bonds (quantum tunneling).", category: "Breakdown Mechanisms", difficulty: "hard", hint: "This mechanism is different from avalanche breakdown and occurs at lower voltages."}
+                ]},
+            'module2': { title: "BJT Circuits", questions: [
+                { question: "For a BJT to operate as an amplifier in the active region, how must its junctions be biased?", options: ["BE forward, BC forward", "BE reverse, BC forward", "BE forward, BC reverse", "BE reverse, BC reverse"], correctAnswer: "BE forward, BC reverse", explanation: "In the active region, the Base-Emitter (BE) junction is forward-biased to allow a small base current, while the Base-Collector (BC) junction is reverse-biased to allow the collector to gather the charge carriers.", category: "BJT Operation", difficulty: "easy", hint: "One junction is 'on', the other is 'off'."},
+                { question: "The relationship between collector current (Ic) and base current (Ib) is defined by:", options: ["Alpha (α)", "Beta (β)", "Gamma (γ)", "Delta (δ)"], correctAnswer: "Beta (β)", explanation: "Beta (β), or hFE, is the DC current gain, defined as the ratio of collector current to base current (β = Ic / Ib).", category: "BJT Fundamentals", difficulty: "easy", hint: "This parameter indicates the transistor's amplifying capability."},
+                { question: "A current mirror circuit is used to:", options: ["Create a copy of a current", "Double the voltage", "Limit the current", "Invert the current"], correctAnswer: "Create a copy of a current", explanation: "A current mirror uses two matched transistors to replicate a current flowing through one transistor in the other, which is useful for biasing other circuits.", category: "Biasing Circuits", difficulty: "medium", hint: "It reflects the input current to the output."},
+                { question: "Which BJT amplifier configuration is known for having a high input impedance and a voltage gain of approximately 1?", options: ["Common-Emitter", "Common-Base", "Common-Collector", "Common-Gate"], correctAnswer: "Common-Collector", explanation: "The Common-Collector configuration, also known as an emitter-follower, has a high input impedance, low output impedance, and a non-inverting voltage gain close to unity, making it an excellent buffer.", category: "BJT Configurations", difficulty: "medium", hint: "The output at the emitter 'follows' the input at the base."}
+            ]},
+            'module3': { title: "MOSFET Circuits", questions: [
+                { question: "A MOSFET is a:", options: ["Current-controlled device", "Voltage-controlled device", "Bipolar device", "Unijunction device"], correctAnswer: "Voltage-controlled device", explanation: "A Metal-Oxide-Semiconductor Field-Effect Transistor (MOSFET) is a voltage-controlled device where the voltage on the insulated gate terminal controls the conductivity of a channel.", category: "MOSFET Fundamentals", difficulty: "easy", hint: "The electric field from the gate does the controlling."},
+                { question: "Which MOSFET amplifier configuration provides a 180-degree phase shift between input and output?", options: ["Common-Source", "Common-Gate", "Common-Drain", "Common-Base"], correctAnswer: "Common-Source", explanation: "The Common-Source amplifier is analogous to the BJT's Common-Emitter configuration and provides high voltage gain with a 180-degree phase inversion.", category: "MOSFET Amplifiers", difficulty: "medium", hint: "This is the most common MOSFET amplifier topology."},
+                { question: "In a MOSFET, 'pinch-off' refers to the point where:", options: ["The gate current is zero", "The drain current becomes nearly constant as Vds increases", "The transistor turns off", "The transistor overheats"], correctAnswer: "The drain current becomes nearly constant as Vds increases", explanation: "When the drain-source voltage (Vds) is high enough, the channel near the drain is 'pinched off', and the drain current saturates, becoming largely independent of further increases in Vds.", category: "MOSFET Characteristics", difficulty: "hard", hint: "This defines the start of the saturation region of operation."}
+            ]},
+            'module4': { title: "Op-Amps & Amplifiers", questions: [
+                 { question: "An ideal operational amplifier (Op-Amp) has:", options: ["Low input impedance, low gain", "High input impedance, low gain", "Low input impedance, infinite gain", "Infinite input impedance, infinite gain"], correctAnswer: "Infinite input impedance, infinite gain", explanation: "The ideal model of an Op-Amp assumes it draws no input current (infinite input impedance), has an infinitely large open-loop gain, and zero output impedance.", category: "Ideal Op-Amp", difficulty: "easy", hint: "These are the 'perfect' conditions that simplify analysis."},
+                 { question: "What is the 'Gain-Bandwidth Product' of an op-amp?", options: ["The gain at the highest frequency", "A constant value for a given op-amp, equal to the unity-gain frequency", "The product of gain and supply voltage", "The op-amp's power efficiency"], correctAnswer: "A constant value for a given op-amp, equal to the unity-gain frequency", explanation: "The Gain-Bandwidth Product (GBW) is a figure of merit. For any amplifier configuration, the product of its closed-loop gain and its bandwidth is approximately constant and equal to the GBW.", category: "Practical Op-Amps", difficulty: "hard", hint: "If you increase the gain, the bandwidth must decrease."}
+            ]},
+            'module5': { title: "Linear Op-Amp Applications", questions: [
+                 { question: "An op-amp circuit that produces an output proportional to the integral of the input is called an:", options: ["Differentiator", "Integrator", "Instrumentation Amplifier", "Active Filter"], correctAnswer: "Integrator", explanation: "An integrator circuit, typically built with a resistor in the input path and a capacitor in the feedback path, performs the mathematical operation of integration on the input signal.", category: "Op-Amp Applications", difficulty: "medium", hint: "This circuit is fundamental in analog computers and waveform generators."},
+                 { question: "A Wein bridge oscillator is used to generate what type of waveform?", options: ["Square wave", "Triangular wave", "Sine wave", "Sawtooth wave"], correctAnswer: "Sine wave", explanation: "The Wein bridge oscillator uses a lead-lag network and an op-amp to produce a low-distortion sinusoidal output at a specific frequency.", category: "Oscillators", difficulty: "hard", hint: "It relies on a frequency-selective RC network for positive feedback."}
+            ]},
+            'module6': { title: "Nonlinear Op-Amp Applications", questions: [
+                { question: "A 'Hysteretic Comparator' is also known as a:", options: ["Voltage Follower", "Schmitt Trigger", "Precision Rectifier", "Peak Detector"], correctAnswer: "Schmitt Trigger", explanation: "A Schmitt trigger is a comparator circuit with hysteresis, meaning it has two different switching thresholds for rising and falling inputs. This prevents noise from causing unwanted switching.", category: "Comparators", difficulty: "medium", hint: "Its key feature is two separate threshold voltages."},
+                { question: "A precision rectifier uses an op-amp to overcome the:", options: ["Low gain of the op-amp", "Input offset voltage", "Slew rate limitation", "Forward voltage drop of the diode"], correctAnswer: "Forward voltage drop of the diode", explanation: "In a standard diode rectifier, the 0.7V forward drop prevents rectification of small signals. A precision rectifier places the diode in the op-amp's feedback loop, effectively nullifying the voltage drop and allowing accurate rectification of millivolt-level signals.", category: "Rectifiers", difficulty: "hard", hint: "It creates a nearly 'ideal' diode behavior for small signals."}
+            ]}
+        }
+    },
+    'digital-electronics': {
+        title: "Digital Electronics",
+        description: "Logic Gates, Circuits, and Memories",
+        style: "from-teal-500 to-cyan-500",
+        modules: {
+            'module1': { title: "Fundamentals", questions: [
+                { question: "Which logic gate is known as a universal gate?", options: ["AND", "OR", "NAND", "XOR"], correctAnswer: "NAND", explanation: "Both NAND and NOR gates are universal gates because any other logic function (AND, OR, NOT, etc.) can be implemented using only NAND gates or only NOR gates.", category: "Logic Gates", difficulty: "easy", hint: "You can create NOT, AND, and OR gates using only this type of gate." },
+                { question: "Convert the binary number 1011 to its decimal equivalent.", options: ["9", "10", "11", "13"], correctAnswer: "11", explanation: "1011 in binary is (1 * 2^3) + (0 * 2^2) + (1 * 2^1) + (1 * 2^0) = 8 + 0 + 2 + 1 = 11.", category: "Number Systems", difficulty: "easy", hint: "Use powers of 2 for each position, starting from the right at 2^0." },
+                { question: "The two's complement of a binary number is used for:", options: ["Representing signed numbers and subtraction", "Error detection", "Increasing speed", "Floating point representation"], correctAnswer: "Representing signed numbers and subtraction", explanation: "Two's complement is the standard method for representing negative integers in computers, as it allows subtraction to be performed using addition circuitry.", category: "Number Systems", difficulty: "medium", hint: "This system makes arithmetic hardware simpler."},
+                { question: "Which logic family is known for its very low static power consumption?", options: ["TTL", "ECL", "CMOS", "DTL"], correctAnswer: "CMOS", explanation: "Complementary Metal-Oxide-Semiconductor (CMOS) logic has very low static power dissipation because in a steady state (0 or 1), one of the transistors in the complementary pair is always off, drawing almost no current.", category: "Logic Families", difficulty: "hard", hint: "This family is dominant in modern integrated circuits like microprocessors."}
+            ]},
+            'module2': { title: "Combinational Circuits", questions: [
+                { question: "A full adder can add how many bits at a time?", options: ["Two", "Three", "Four", "One"], correctAnswer: "Three", explanation: "A full adder adds three bits: two input bits (A and B) and a carry-in bit (Cin) from a previous stage, producing a sum and a carry-out.", category: "Adders", difficulty: "easy", hint: "It needs to account for a carry from the previous column." },
+                { question: "How many selection lines are required for a 16-to-1 multiplexer?", options: ["2", "4", "8", "16"], correctAnswer: "4", explanation: "The number of selection lines 'n' required for a 2^n-to-1 MUX is n. Since 2^4 = 16, a 16-to-1 MUX requires 4 selection lines.", category: "Multiplexers", difficulty: "medium", hint: "The relationship is 2^(number of select lines) = number of inputs." },
+                { question: "Which device converts a binary code into a set of signals to drive a display?", options: ["Encoder", "Decoder", "Multiplexer", "Flip-flop"], correctAnswer: "Decoder", explanation: "A decoder, such as a BCD-to-7-segment decoder, takes a binary input and activates the specific output lines needed to represent that code, for example, on a 7-segment display.", category: "Decoders", difficulty: "medium", hint: "This circuit 'decodes' a compact binary representation into a more explicit form." },
+                { question: "A 'carry look-ahead adder' is faster than a 'ripple carry adder' because:", options: ["It uses fewer gates", "It calculates carry bits in parallel", "It consumes less power", "It uses a different logic family"], correctAnswer: "It calculates carry bits in parallel", explanation: "A ripple carry adder has to wait for the carry from the previous bit to be calculated. A carry look-ahead adder uses additional logic to calculate the carry bits for multiple positions simultaneously, significantly reducing the delay for large adders.", category: "Adders", difficulty: "hard", hint: "It doesn't wait for the carry to 'ripple' through."}
+            ]},
+            'module3': { title: "Sequential Circuits", questions: [
+                 { question: "Which flip-flop is also known as a delay flip-flop?", options: ["SR Flip-Flop", "JK Flip-Flop", "T Flip-Flop", "D Flip-Flop"], correctAnswer: "D Flip-Flop", explanation: "The D (Data or Delay) flip-flop is called a delay flip-flop because its output Q takes on the value of the D input from the previous clock pulse, effectively delaying the input by one clock cycle.", category: "Flip-Flops", difficulty: "easy", hint: "Its output is a 'delayed' version of its input."},
+                 { question: "Which type of counter is also known as an asynchronous counter?", options: ["Ring Counter", "Synchronous Counter", "Ripple Counter", "Decade Counter"], correctAnswer: "Ripple Counter", explanation: "In a ripple counter, the clock input is applied only to the first flip-flop. The output of each flip-flop then serves as the clock for the next one, causing the count to 'ripple' through the chain.", category: "Counters", difficulty: "medium", hint: "Not all flip-flops share the same clock signal."},
+                 { question: "What is the primary function of a shift register?", options: ["Counting pulses", "Storing and shifting binary data", "Adding binary numbers", "Generating a clock signal"], correctAnswer: "Storing and shifting binary data", explanation: "A shift register is a cascade of flip-flops sharing the same clock, where the output of each flip-flop is connected to the 'data' input of the next, allowing data to be moved or 'shifted' along the chain.", category: "Shift Registers", difficulty: "medium", hint: "It's used for tasks like serial-to-parallel data conversion." }
+            ]},
+            'module4': { title: "A/D & D/A Converters", questions: [
+                 { question: "Which type of D/A converter uses a network of resistors with values of R and 2R?", options: ["Weighted Resistor DAC", "R-2R Ladder DAC", "Flash DAC", "Successive Approximation DAC"], correctAnswer: "R-2R Ladder DAC", explanation: "The R-2R ladder is a popular DAC architecture because it only requires two resistor values, which are easier to fabricate with high precision compared to the wide range of resistor values needed in a weighted resistor DAC.", category: "D/A Converters", difficulty: "medium", hint: "The name gives away the resistor values used."},
+                 { question: "Which is the fastest type of A/D converter?", options: ["Successive Approximation ADC", "Dual Slope ADC", "Flash (Parallel Comparator) ADC", "Sigma-Delta ADC"], correctAnswer: "Flash (Parallel Comparator) ADC", explanation: "A flash ADC uses a bank of comparators to compare the input signal to multiple reference voltages simultaneously, making it extremely fast but also complex and power-hungry.", category: "A/D Converters", difficulty: "hard", hint: "It determines the conversion in a single step, like a camera flash."}
+            ]},
+            'module5': { title: "Memories & PLDs", questions: [
+                 { question: "Which type of memory is volatile?", options: ["ROM", "EPROM", "Flash Memory", "SRAM"], correctAnswer: "SRAM", explanation: "Volatile memory requires power to maintain the stored information. Both SRAM (Static RAM) and DRAM (Dynamic RAM) are volatile, while ROM and Flash are non-volatile.", category: "Memory Types", difficulty: "easy", hint: "It loses its contents when the power is turned off."},
+                 { question: "What does FPGA stand for?", options: ["Field Programmable Gate Array", "Fast Programmable Gate Array", "Field Programmable Generic Array", "Fixed Program Gate Array"], correctAnswer: "Field Programmable Gate Array", explanation: "An FPGA is an integrated circuit designed to be configured by a customer or a designer after manufacturing—hence 'field-programmable'. It contains an array of programmable logic blocks.", category: "PLDs", difficulty: "medium", hint: "These devices are known for their reconfigurability in the 'field'."}
+            ]}
+        }
+    },
+    'data-structures': {
+        title: "Data Structures",
+        description: "Algorithms and Data Organization",
+        style: "from-purple-500 to-violet-500",
+        modules: {
+            'module1': { 
+                title: "Intro & Searching", 
+                questions: [
+                    { question: "What is the time complexity of a binary search algorithm in the worst case?", options: ["O(1)", "O(log n)", "O(n)", "O(n^2)"], correctAnswer: "O(log n)", explanation: "Binary search works on sorted arrays by repeatedly dividing the search interval in half. This logarithmic behavior makes it very efficient for large datasets.", category: "Complexity Analysis", difficulty: "easy", hint: "It halves the problem size at each step."},
+                    { question: "Which of these is NOT a linear data structure?", options: ["Array", "Stack", "Queue", "Tree"], correctAnswer: "Tree", explanation: "Linear data structures store data sequentially. A tree is a hierarchical data structure where data is organized in a parent-child relationship.", category: "Data Structures", difficulty: "easy", hint: "Think about how the elements are connected to each other."},
+                    { question: "Big O notation (O) is used to describe the:", options: ["Exact running time of an algorithm", "Average case performance", "Upper bound on the growth rate of a function", "Lower bound on the growth rate of a function"], correctAnswer: "Upper bound on the growth rate of a function", explanation: "Big O notation provides an asymptotic upper bound for the magnitude of a function in terms of another, usually simpler, function. It describes the worst-case scenario.", category: "Asymptotic Notations", difficulty: "medium", hint: "It's concerned with how an algorithm performs as the input size grows very large."}
+                ],
+                codingProblems: [
+                    {
+                        title: "Two Sum",
+                        prompt: `Given an array of integers \`nums\` and an integer \`target\`, return indices of the two numbers such that they add up to \`target\`.<br><br>You may assume that each input would have <strong>exactly one solution</strong>, and you may not use the <em>same</em> element twice.<br><br>You can return the answer in any order.<br><br><strong>Example 1:</strong><br>Input: nums = [2,7,11,15], target = 9<br>Output: [0,1]<br>Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].`,
+                        defaultCode: {
+                            js: `function twoSum(nums, target) {\n    // Write your code here\n\n}`,
+                            py: `def two_sum(nums, target):\n    # Write your code here\n    pass`,
+                            cpp: `class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        // Write your code here\n    }\n};`,
+                            java: `class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        // Write your code here\n    }\n}`
+                        },
+                        solution: {
+                            js: `function twoSum(nums, target) {\n    const map = new Map();\n    for (let i = 0; i < nums.length; i++) {\n        const complement = target - nums[i];\n        if (map.has(complement)) {\n            return [map.get(complement), i];\n        }\n        map.set(nums[i], i);\n    }\n}`
+                        },
+                        explanation: "This problem can be solved in a single pass using a hash map (or JavaScript's `Map`). We iterate through the array, and for each element, we calculate its 'complement' (the other number that would add up to the target). If the complement already exists in our map, we've found our pair and can return their indices. If not, we add the current number and its index to the map for future lookups. This approach has a time complexity of O(n) because we visit each element once, and map lookups are O(1) on average.",
+                        testCases: [
+                            { input: { nums: [2, 7, 11, 15], target: 9 }, expectedOutput: [0, 1] },
+                            { input: { nums: [3, 2, 4], target: 6 }, expectedOutput: [1, 2] },
+                            { input: { nums: [3, 3], target: 6 }, expectedOutput: [0, 1] },
+                        ]
+                    }
+                ]
+            },
+             'module2': { 
+                title: "Stacks & Queues", 
+                questions: [
+                    { question: "Which data structure follows the Last-In, First-Out (LIFO) principle?", options: ["Queue", "Stack", "Linked List", "Tree"], correctAnswer: "Stack", explanation: "A stack operates like a stack of plates; the last one you add is the first one you remove. This is known as LIFO.", category: "Stacks", difficulty: "easy", hint: "Think of a pile of books."},
+                    { question: "A queue data structure is based on which principle?", options: ["Last-In, First-Out (LIFO)", "First-In, First-Out (FIFO)", "Last-In, Last-Out (LILO)", "First-In, Last-Out (FILO)"], correctAnswer: "First-In, First-Out (FIFO)", explanation: "A queue operates like a line of people; the first person to get in line is the first person to be served. This is known as FIFO.", category: "Queues", difficulty: "easy", hint: "Think of a checkout line at a store."},
+                    { question: "Converting an infix expression to postfix is a common application of which data structure?", options: ["Queue", "Stack", "Array", "Hash Table"], correctAnswer: "Stack", explanation: "A stack is used to hold operators and manage precedence during the conversion of an infix expression (like 3 + 4) to a postfix expression (like 3 4 +), which is easier for computers to evaluate.", category: "Applications", difficulty: "hard", hint: "This structure helps handle operator precedence and parentheses."}
+                ],
+                codingProblems: [
+                    {
+                        title: "Valid Parentheses",
+                        prompt: `Given a string \`s\` containing just the characters \`(\`, \`)\`, \`{\`, \`}\`, \`[\` and \`]\`, determine if the input string is valid.<br><br>An input string is valid if:<br>1. Open brackets must be closed by the same type of brackets.<br>2. Open brackets must be closed in the correct order.<br>3. Every close bracket has a corresponding open bracket of the same type.<br><br><strong>Example 1:</strong><br>Input: s = "()"<br>Output: true<br><br><strong>Example 2:</strong><br>Input: s = "()[]{}"<br>Output: true<br><br><strong>Example 3:</strong><br>Input: s = "(]"<br>Output: false`,
+                        defaultCode: {
+                           js: `function isValid(s) {\n    // Write your code here\n\n}`,
+                           py: `class Solution:\n    def isValid(self, s: str) -> bool:\n        # Write your code here\n        pass`,
+                           cpp: `class Solution {\npublic:\n    bool isValid(string s) {\n        // Write your code here\n    }\n};`,
+                           java: `class Solution {\n    public boolean isValid(String s) {\n        // Write your code here\n    }\n}`
+                        },
+                        solution: {
+                            js: `function isValid(s) {\n    const stack = [];\n    const map = {\n        "(": ")",\n        "[": "]",\n        "{": "}"\n    };\n\n    for (let i = 0; i < s.length; i++) {\n        let c = s[i];\n        if (map[c]) {\n            stack.push(map[c]);\n        } else if (stack.length > 0 && stack[stack.length - 1] === c) {\n            stack.pop();\n        } else {\n            return false;\n        }\n    }\n\n    return stack.length === 0;\n}`
+                        },
+                        explanation: "This is a classic problem for the Stack data structure. We iterate through the string. If we encounter an opening bracket, we push its corresponding closing bracket onto the stack. If we see a closing bracket, we check if the stack is empty or if the top of the stack matches the current bracket. If it matches, we pop from the stack, signifying a valid pair. If it doesn't match or the stack is empty, the string is invalid. Finally, after iterating through the whole string, the stack must be empty for the string to be considered valid.",
+                        testCases: [
+                            { input: { s: "()" }, expectedOutput: true },
+                            { input: { s: "()[]{}" }, expectedOutput: true },
+                            { input: { s: "(]" }, expectedOutput: false },
+                            { input: { s: "([)]" }, expectedOutput: false },
+                            { input: { s: "{[]}" }, expectedOutput: true },
+                            { input: { s: "]" }, expectedOutput: false },
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    'calculus-odes': {
+        title: "Calculus & ODEs",
+        description: "Advanced Engineering Mathematics",
+        style: "from-green-500 to-emerald-500",
+        modules: {
+            'module1': {
+                title: "Sequences & Series",
+                questions: [
+                    { question: "A Taylor Series is a representation of a function as an infinite sum of terms calculated from the values of the function's:", options: ["Integrals at a single point", "Derivatives at a single point", "Roots", "Asymptotes"], correctAnswer: "Derivatives at a single point", explanation: "The Taylor series expansion of a function is determined by its derivatives evaluated at a specific point, allowing the function to be approximated by a polynomial.", category: "Series", difficulty: "medium", hint: "It's a way to approximate a complex function with a simpler polynomial." },
+                    { question: "Which test for convergence of an infinite series compares the series to a known convergent or divergent integral?", options: ["Ratio Test", "Root Test", "Integral Test", "Comparison Test"], correctAnswer: "Integral Test", explanation: "The Integral Test for convergence is a method used to test an infinite series of non-negative terms for convergence by comparing it to an improper integral.", category: "Convergence Tests", difficulty: "hard", hint: "This test connects the concepts of summation and integration." }
+                ]
+            },
+            'module2': {
+                title: "Multivariable Calculus",
+                questions: [
+                    { question: "The gradient of a scalar field f(x,y,z) results in a:", options: ["Scalar field", "Vector field", "Constant", "Matrix"], correctAnswer: "Vector field", explanation: "The gradient (∇f) of a scalar function f is a vector field where each vector points in the direction of the greatest rate of increase of f, and its magnitude is that rate of increase.", category: "Gradient", difficulty: "easy", hint: "It points 'uphill' on the scalar field." },
+                    { question: "The divergence of a vector field F results in a:", options: ["Scalar field", "Vector field", "Constant", "Matrix"], correctAnswer: "Scalar field", explanation: "The divergence (∇ · F) measures the magnitude of a vector field's source or sink at a given point. It is a scalar value representing the volume density of the outward flux.", category: "Divergence", difficulty: "medium", hint: "Think of it as measuring how much the field is 'spreading out' from a point." },
+                    { question: "If the curl of a vector field F is zero (∇ x F = 0) everywhere, the field is called:", options: ["Solenoidal", "Irrotational", "Divergent", "Convergent"], correctAnswer: "Irrotational", explanation: "A vector field with zero curl is called irrotational. This means it has no local rotation or circulation. Such fields can often be expressed as the gradient of a scalar potential.", category: "Curl", difficulty: "hard", hint: "A field with zero divergence is called solenoidal." }
+                ]
+            },
+             'module3': {
+                title: "Ordinary Differential Equations",
+                questions: [
+                    { question: "A differential equation of the form dy/dx + P(x)y = Q(x) is known as a:", options: ["Separable equation", "Homogeneous equation", "Linear first-order equation", "Exact equation"], correctAnswer: "Linear first-order equation", explanation: "This is the standard form for a linear first-order ODE, which can be solved using an integrating factor.", category: "First-Order ODEs", difficulty: "easy", hint: "Its form is linear in y and dy/dx."},
+                    { question: "The method of variation of parameters is used to find:", options: ["The complementary function of a non-homogeneous ODE", "The particular integral of a non-homogeneous ODE", "The order of an ODE", "The degree of an ODE"], correctAnswer: "The particular integral of a non-homogeneous ODE", explanation: "Variation of parameters is a general method to find a particular solution for a non-homogeneous linear ODE once the complementary function (solution to the homogeneous part) is known.", category: "Higher-Order ODEs", difficulty: "hard", hint: "This method is more general than the method of undetermined coefficients."}
+                ]
+            }
+        }
+    }
+};
+    
+    const formulaSheets = {
+        'calculus-odes': `
+            <p class="font-bold">Laplace Transforms:</p>
+            <ul class="list-disc list-inside">
+                <li>L{1} = 1/s</li>
+                <li>L{t^n} = n! / s^(n+1)</li>
+                <li>L{e^at} = 1 / (s-a)</li>
+                <li>L{sin(at)} = a / (s^2 + a^2)</li>
+                <li>L{cos(at)} = s / (s^2 + a^2)</li>
+                <li>L{f'(t)} = sF(s) - f(0)</li>
+            </ul>
+            <p class="font-bold mt-4">Vector Calculus:</p>
+             <ul class="list-disc list-inside">
+                <li>Gradient: ∇f = (∂f/∂x)i + (∂f/∂y)j + (∂f/∂z)k</li>
+                <li>Divergence: ∇ · F = ∂F_x/∂x + ∂F_y/∂y + ∂F_z/∂z</li>
+                <li>Curl: ∇ x F = | i  j  k |<br>| ∂/∂x ∂/∂y ∂/∂z |<br>| F_x F_y F_z |</li>
+            </ul>
+        `
+    };
+    
+    // --- GLOBAL STATE ---
+    let currentQuizState = {};
+    let timerInterval;
+    let performanceChart;
+    let codeMirrorEditor;
+    
+    // --- AUDIO ---
+    let synth, correctSynth, incorrectSynth;
+    let audioInitialized = false;
+    let speechVoices = [];
+
+    function initializeAudio() {
+        if (audioInitialized) return;
+        try {
+            Tone.start();
+            synth = new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0.2, release: 0.2 } }).toDestination();
+            correctSynth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'sine' }, envelope: { attack: 0.05, decay: 0.2, sustain: 0.1, release: 0.3 } }).toDestination();
+            incorrectSynth = new Tone.MonoSynth({ oscillator: { type: 'sawtooth' }, envelope: { attack: 0.01, decay: 0.3, sustain: 0, release: 0.2 }, filterEnvelope: { attack: 0.01, decay: 0.1, sustain: 0, baseFrequency: 200, octaves: 2 } }).toDestination();
+            
+            loadSpeechVoices();
+            if (speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = loadSpeechVoices;
+            }
+            audioInitialized = true;
+        } catch (e) {
+            console.error("Could not initialize audio:", e);
+        }
+    }
+
+    function loadSpeechVoices() {
+        speechVoices = speechSynthesis.getVoices();
+    }
+    
+    // --- DOM ELEMENT CACHE ---
+    const containers = {
+        subjectSelect: document.getElementById('subject-select-container'),
+        moduleSelect: document.getElementById('module-select-container'),
+        quizType: document.getElementById('quiz-type-container'),
+        history: document.getElementById('history-container'),
+        start: document.getElementById('start-container'),
+        quiz: document.getElementById('quiz-container'),
+        codingChallenge: document.getElementById('coding-challenge-container'),
+        results: document.getElementById('results-container'),
+        review: document.getElementById('review-container'),
+    };
+    const aiModal = {
+        main: document.getElementById('ai-modal'),
+        backdrop: document.getElementById('ai-modal-backdrop'),
+        closeBtn: document.getElementById('ai-modal-close')
+    };
+     const toolsModal = {
+        main: document.getElementById('tools-modal'),
+        backdrop: document.getElementById('tools-modal-backdrop'),
+        closeBtn: document.getElementById('tools-modal-close'),
+        title: document.getElementById('tools-modal-title'),
+        calculator: document.getElementById('calculator-tool'),
+        converter: document.getElementById('converter-tool'),
+        formulas: document.getElementById('formula-tool'),
+        formulaContent: document.getElementById('formula-content')
+    };
+     const solutionModal = {
+        main: document.getElementById('solution-modal'),
+        closeBtn: document.getElementById('solution-modal-close'),
+        explanation: document.getElementById('solution-explanation'),
+        code: document.getElementById('solution-code')
+    };
+
+    // --- SESSION & LOCAL STORAGE ---
+    const loadHistory = () => JSON.parse(localStorage.getItem('quizHistory')) || [];
+    const saveHistory = (history) => localStorage.setItem('quizHistory', JSON.stringify(history));
+    const loadMistakes = () => JSON.parse(localStorage.getItem('savedMistakes')) || {};
+    const saveMistakes = (mistakes) => localStorage.setItem('savedMistakes', JSON.stringify(mistakes));
+    const saveQuizState = () => sessionStorage.setItem('activeQuizState', JSON.stringify(currentQuizState));
+    const clearQuizState = () => sessionStorage.removeItem('activeQuizState');
+
+    // --- INITIALIZATION & THEME ---
+    document.addEventListener('DOMContentLoaded', () => {
+        setupTheme();
+        populateSubjects();
+        checkMistakes();
+        setupEventListeners();
+        restoreQuizState();
+    });
+    
+    function setupTheme() {
+        const themeToggle = document.getElementById('theme-toggle');
+        const sunIcon = document.getElementById('theme-icon-sun');
+        const moonIcon = document.getElementById('theme-icon-moon');
+        
+        const applyTheme = (theme) => {
+            if (theme === 'light') {
+                document.documentElement.classList.add('light');
+                document.documentElement.classList.remove('dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                document.documentElement.classList.add('dark');
+                document.documentElement.classList.remove('light');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+            if (performanceChart) renderChart(); 
+            if (codeMirrorEditor) codeMirrorEditor.setOption("theme", theme === 'light' ? 'default' : 'darcula');
+        };
+
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme) {
+            applyTheme(savedTheme);
+        } else {
+            applyTheme(systemPrefersDark ? 'dark' : 'light');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const isLight = document.documentElement.classList.contains('light');
+            const newTheme = isLight ? 'dark' : 'light';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        });
+    }
+
+    function setupEventListeners() {
+        aiModal.closeBtn.addEventListener('click', () => aiModal.main.classList.add('hidden'));
+        aiModal.backdrop.addEventListener('click', () => aiModal.main.classList.add('hidden'));
+        toolsModal.closeBtn.addEventListener('click', () => toolsModal.main.classList.add('hidden'));
+        toolsModal.backdrop.addEventListener('click', () => toolsModal.main.classList.add('hidden'));
+        solutionModal.closeBtn.addEventListener('click', () => solutionModal.main.classList.add('hidden'));
+        solutionModal.main.querySelector('.bg-black\\/60').addEventListener('click', () => solutionModal.main.classList.add('hidden'));
+
+
+        document.getElementById('next-button').addEventListener('click', handleNextQuestion);
+        document.getElementById('review-incorrect-button').addEventListener('click', startReviewingIncorrect);
+        document.getElementById('back-to-results-button').addEventListener('click', () => switchView(containers.review, containers.results));
+        document.getElementById('review-prev-button').addEventListener('click', () => handleReviewNavigation(-1));
+        document.getElementById('review-next-button').addEventListener('click', () => handleReviewNavigation(1));
+        document.getElementById('view-history-btn').addEventListener('click', () => {
+            displayHistory();
+            switchView(containers.subjectSelect, containers.history);
+        });
+        document.getElementById('back-to-subjects-from-history-btn').addEventListener('click', () => goBackToSubjects(containers.history));
+        document.getElementById('back-to-subjects-btn').addEventListener('click', () => goBackToSubjects(containers.moduleSelect));
+        document.getElementById('back-to-modules-from-start-btn').addEventListener('click', () => goBackToModules(containers.start, currentQuizState.selectedSubjectKey === 'data-structures'));
+        document.getElementById('back-to-modules-from-type-btn').addEventListener('click', () => goBackToModules(containers.quizType));
+        document.getElementById('back-to-subjects-from-results-btn').addEventListener('click', () => goBackToSubjects(containers.results));
+        
+        const customCountInput = document.querySelector('#question-count-selector input');
+        if (customCountInput) {
+            document.getElementById('start-custom-quiz-btn').addEventListener('click', handleCustomQuizStart);
+            customCountInput.addEventListener('input', updateQuestionCountUI);
+        }
+
+        document.getElementById('back-to-problems-btn').addEventListener('click', () => {
+             const { selectedModuleKey } = currentQuizState;
+             showCodingProblemSelector(selectedModuleKey);
+        });
+
+        document.addEventListener('keydown', handleShortcuts);
+        document.body.addEventListener('click', (e) => {
+            if (!audioInitialized) initializeAudio();
+            const ttsButton = e.target.closest('.tts-button');
+            if (ttsButton && ttsButton.dataset.explanation) {
+                speakExplanation(ttsButton, ttsButton.dataset.explanation);
+            }
+        });
+        document.body.addEventListener('keydown', initializeAudio, { once: true });
+    }
+
+    function checkMistakes() {
+        const mistakes = loadMistakes();
+        const mistakeCount = Object.values(mistakes).reduce((acc, subjectMistakes) => {
+            return acc + Object.values(subjectMistakes).reduce((modAcc, modMistakes) => modAcc + modMistakes.length, 0);
+        }, 0);
+        const studyBtn = document.getElementById('study-mistakes-btn');
+        if (mistakeCount > 0) {
+            studyBtn.classList.remove('hidden');
+            studyBtn.textContent = `Study ${mistakeCount} Previous Mistakes`;
+        } else {
+            studyBtn.classList.add('hidden');
+        }
+    }
+    
+    // --- UI POPULATION ---
+    function populateSubjects() {
+        const container = document.getElementById('subject-buttons-container');
+        container.innerHTML = '';
+        for (const key in allSubjects) {
+            const subject = allSubjects[key];
+            const button = document.createElement('button');
+            button.onclick = () => selectSubject(key);
+            button.className = `btn-base bg-gradient-to-r ${subject.style} p-6 rounded-lg font-semibold text-xl`;
+            button.innerHTML = `${subject.title}<span class="block text-sm font-normal text-indigo-200 mt-1">${subject.description}</span>`;
+            container.appendChild(button);
+        }
+    }
+
+
+    // --- UI NAVIGATION ---
+    function switchView(hide, show) {
+        if (!hide || !show) return;
+        if (audioInitialized) synth.triggerAttackRelease('C4', '8n');
+        hide.classList.replace('visible-view', 'hidden-view');
+        show.classList.replace('hidden-view', 'visible-view');
+    }
+    
+    function goBackToSubjects(fromContainer) {
+        clearQuizState();
+        switchView(fromContainer, containers.subjectSelect);
+        checkMistakes();
+    }
+    
+    function goBackToModules(fromContainer, isDsa = false) {
+        clearQuizState();
+        const targetContainer = isDsa ? containers.quizType : containers.moduleSelect;
+        switchView(fromContainer, targetContainer);
+    }
+    
+    // --- KEYBOARD SHORTCUTS ---
+    function handleShortcuts(e) {
+        if (document.activeElement.tagName === 'TEXTAREA' || aiModal.main.classList.contains('visible-view') || solutionModal.main.classList.contains('visible-view')) return;
+
+        if (!toolsModal.main.classList.contains('hidden')) {
+             const calcStandardMode = document.getElementById('calc-standard');
+              if(!calcStandardMode.classList.contains('hidden')) { 
+                e.preventDefault();
+                if ('0123456789.+-*/'.includes(e.key)) { calcAppend(e.key); } 
+                else if (e.key === 'Enter' || e.key === '=') { calcResult(); }
+                else if (e.key === 'Backspace') { calcBackspace(); }
+                else if (e.key === 'Delete' || e.key === 'c' || e.key === 'C') { calcClear(); }
+                else if (e.key === 'Escape') { toolsModal.closeBtn.click(); }
+            }
+            return;
+        }
+
+        if (containers.start.classList.contains('visible-view') && e.target.id === 'custom-question-count' && e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('start-custom-quiz-btn').click();
+            return;
+        }
+
+        if (containers.quiz.classList.contains('visible-view')) {
+            const feedbackVisible = !document.getElementById('feedback-container').classList.contains('hidden');
+            if (feedbackVisible) {
+                if (e.key === 'Enter' && e.shiftKey) { e.preventDefault(); document.getElementById('next-button').click(); }
+                else if (e.key === '/') { e.preventDefault(); document.getElementById('question-notes-input')?.focus(); }
+            } else {
+                if (['1', '2', '3', '4'].includes(e.key)) {
+                    e.preventDefault();
+                    const optionButtons = document.querySelectorAll('#options-container button');
+                    const index = parseInt(e.key, 10) - 1;
+                    if (optionButtons[index]) optionButtons[index].click();
+                }
+                const confidenceControls = document.getElementById('confidence-controls');
+                if (!confidenceControls.classList.contains('hidden') && currentQuizState.selectedAnswer) {
+                    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); confidenceControls.querySelector('button[onclick*="confident"]').click(); } 
+                    else if (e.code === 'Space' || (e.key === ' ' && !e.shiftKey)) { e.preventDefault(); confidenceControls.querySelector('button[onclick*="guess"]').click(); }
+                }
+            }
+        }
+    }
+
+    // --- QUIZ SETUP ---
+    function selectSubject(subjectKey) {
+        if (audioInitialized) synth.triggerAttackRelease('E4', '8n');
+        currentQuizState.selectedSubjectKey = subjectKey;
+        const subject = allSubjects[subjectKey];
+
+        document.getElementById('module-select-title').textContent = subject.title;
+        const moduleContainer = document.getElementById('module-buttons-container');
+        moduleContainer.innerHTML = '';
+
+        for (const moduleKey in subject.modules) {
+            const module = subject.modules[moduleKey];
+            const button = document.createElement('button');
+            button.onclick = () => selectModule(moduleKey);
+            button.className = `btn-base bg-gradient-to-r ${subject.style} p-6 rounded-lg font-semibold text-lg`;
+            const questionCount = module.questions ? module.questions.length : 0;
+            const codingCount = module.codingProblems ? module.codingProblems.length : 0;
+            button.innerHTML = `${module.title}<span class="block text-sm font-normal text-indigo-200 mt-1">${questionCount} Qs / ${codingCount} Problems</span>`;
+            moduleContainer.appendChild(button);
+        }
+        
+        switchView(containers.subjectSelect, containers.moduleSelect);
+    }
+
+    function selectModule(moduleKey) {
+        if (audioInitialized) synth.triggerAttackRelease('G4', '8n');
+        currentQuizState = { ...currentQuizState, selectedModuleKey: moduleKey, selectedDifficulty: 'all' };
+        
+        const subject = allSubjects[currentQuizState.selectedSubjectKey];
+
+        if (currentQuizState.selectedSubjectKey === 'data-structures') {
+            showQuizTypeSelector(moduleKey);
+        } else {
+            showStartScreen();
+        }
+    }
+
+    function showQuizTypeSelector(moduleKey) {
+        const subject = allSubjects[currentQuizState.selectedSubjectKey];
+        const module = subject.modules[moduleKey];
+
+        document.getElementById('quiz-type-title').innerHTML = `${subject.title}: <br class="md:hidden"/> <span class="text-2xl text-text-secondary">${module.title}</span>`;
+        const container = document.getElementById('quiz-type-buttons-container');
+        container.innerHTML = `
+            <button onclick="showStartScreen()" class="btn-base bg-gradient-to-r from-sky-500 to-blue-500 p-6 rounded-lg font-semibold text-lg">
+                Theoretical Quiz
+                <span class="block text-sm font-normal text-blue-200 mt-1">${module.questions.length} multiple-choice questions</span>
+            </button>
+            <button onclick="showCodingProblemSelector()" class="btn-base bg-gradient-to-r from-fuchsia-500 to-purple-600 p-6 rounded-lg font-semibold text-lg">
+                Coding Challenge
+                <span class="block text-sm font-normal text-purple-200 mt-1">${module.codingProblems.length} interactive problems</span>
+            </button>
+        `;
+        switchView(containers.moduleSelect, containers.quizType);
+    }
+
+    function showStartScreen() {
+        const subject = allSubjects[currentQuizState.selectedSubjectKey];
+        const module = subject.modules[currentQuizState.selectedModuleKey];
+        const titleEl = document.getElementById('start-title');
+        titleEl.innerHTML = `${subject.title}: <br class="md:hidden"/> <span class="text-2xl text-text-secondary">${module.title}</span>`;
+        titleEl.className = 'text-4xl font-bold text-blue-400';
+        document.getElementById('start-subtitle').textContent = 'Select difficulty and number of questions.';
+        document.getElementById('difficulty-selector').classList.remove('hidden');
+
+        document.getElementById('question-count-selector').innerHTML = `
+            <button data-count="10" onclick="startQuiz(10)" class="btn-base bg-blue-600 p-4 rounded-lg font-semibold">Quick (10)</button>
+            <button data-count="25" onclick="startQuiz(25)" class="btn-base bg-blue-600 p-4 rounded-lg font-semibold">Standard (25)</button>
+            <button data-count="50" onclick="startQuiz(50)" class="btn-base bg-blue-600 p-4 rounded-lg font-semibold">Marathon (50)</button>
+            <button id="full-test-btn" class="btn-base bg-blue-600 p-4 rounded-lg font-semibold col-span-full md:col-span-3">Full Test</button>
+            <div class="col-span-full md:col-span-3 bg-slate-200/50 dark:bg-slate-900/50 p-4 rounded-lg flex flex-col sm:flex-row gap-4 items-center">
+                <input type="number" id="custom-question-count" placeholder="Custom... (then press Enter)" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg p-3 w-full text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-text-primary" min="1">
+                <button id="start-custom-quiz-btn" class="btn-base bg-indigo-600 p-3 rounded-lg font-semibold w-full sm:w-auto flex-shrink-0">Start Custom Quiz</button>
+            </div>
+        `;
+        
+        document.querySelectorAll('#difficulty-selector .difficulty-btn').forEach(btn => btn.classList.remove('selected'));
+        document.querySelector('#difficulty-selector .difficulty-btn[onclick*="all"]').classList.add('selected');
+        
+        updateQuestionCountUI();
+        const fromContainer = currentQuizState.selectedSubjectKey === 'data-structures' ? containers.quizType : containers.moduleSelect;
+        switchView(fromContainer, containers.start);
+    }
+
+    function showCodingProblemSelector() {
+        const subject = allSubjects[currentQuizState.selectedSubjectKey];
+        const module = subject.modules[currentQuizState.selectedModuleKey];
+        const titleEl = document.getElementById('start-title');
+
+        titleEl.innerHTML = `Coding Problems: <br class="md:hidden"/> <span class="text-2xl text-text-secondary">${module.title}</span>`;
+        titleEl.className = 'text-4xl font-bold text-purple-400';
+        document.getElementById('start-subtitle').textContent = 'Select a problem to begin.';
+        document.getElementById('difficulty-selector').classList.add('hidden');
+
+        const container = document.getElementById('question-count-selector');
+        container.innerHTML = '';
+        module.codingProblems.forEach((problem, index) => {
+            const button = document.createElement('button');
+            button.onclick = () => startCodingChallenge(index);
+            button.className = 'btn-base bg-purple-600 p-4 rounded-lg font-semibold text-left col-span-full';
+            button.textContent = problem.title;
+            container.appendChild(button);
+        });
+
+        switchView(containers.quizType, containers.start);
+    }
+
+    function selectDifficulty(difficulty) {
+        if (audioInitialized) synth.triggerAttackRelease('A3', '8n');
+        currentQuizState.selectedDifficulty = difficulty;
+        document.querySelectorAll('#difficulty-selector .difficulty-btn').forEach(btn => {
+            btn.classList.toggle('selected', btn.getAttribute('onclick').includes(`'${difficulty}'`));
+        });
+        updateQuestionCountUI();
+    }
+    
+    function updateQuestionCountUI() {
+        const { selectedSubjectKey, selectedModuleKey, selectedDifficulty } = currentQuizState;
+        let questions = allSubjects[selectedSubjectKey]?.modules[selectedModuleKey]?.questions || [];
+        
+        if (selectedDifficulty !== 'all') {
+            questions = questions.filter(q => q.difficulty === selectedDifficulty);
+        }
+        const availableCount = questions.length;
+
+        document.querySelectorAll('#question-count-selector button[data-count]').forEach(btn => {
+            const count = parseInt(btn.dataset.count, 10);
+            btn.disabled = availableCount < count;
+        });
+
+        const fullTestBtn = document.getElementById('full-test-btn');
+        if (fullTestBtn) {
+            fullTestBtn.textContent = `Full Test (${availableCount})`;
+            fullTestBtn.onclick = () => startQuiz(availableCount);
+            fullTestBtn.disabled = availableCount === 0;
+        }
+
+        const customCountInput = document.getElementById('custom-question-count');
+        const startCustomBtn = document.getElementById('start-custom-quiz-btn');
+        if (customCountInput && startCustomBtn) {
+            customCountInput.max = availableCount;
+            const currentCustomValue = parseInt(customCountInput.value, 10);
+            
+            const isCustomValid = !isNaN(currentCustomValue) && currentCustomValue > 0 && currentCustomValue <= availableCount;
+            startCustomBtn.disabled = !isCustomValid;
+            
+            if (customCountInput.value) {
+                 customCountInput.classList.toggle('border-green-500', isCustomValid);
+                 customCountInput.classList.toggle('border-red-500', !isCustomValid);
+            } else {
+                 customCountInput.classList.remove('border-green-500', 'border-red-500');
+            }
+        }
+    }
+
+    function handleCustomQuizStart() {
+        const customCountInput = document.getElementById('custom-question-count');
+        const count = parseInt(customCountInput.value, 10);
+        const { selectedSubjectKey, selectedModuleKey, selectedDifficulty } = currentQuizState;
+        let questions = allSubjects[selectedSubjectKey].modules[selectedModuleKey].questions;
+        if (selectedDifficulty !== 'all') {
+            questions = questions.filter(q => q.difficulty === selectedDifficulty);
+        }
+        const availableCount = questions.length;
+
+        if (count > 0 && count <= availableCount) {
+            startQuiz(count);
+        } else {
+            if(audioInitialized) incorrectSynth.triggerAttackRelease('C2', '8n');
+            customCountInput.classList.add('border-red-500', 'animate-shake');
+            setTimeout(() => customCountInput.classList.remove('animate-shake'), 500);
+        }
+    }
+
+    // --- QUIZ START & CORE LOGIC ---
+    function startQuiz(numQuestions, isReview = false) {
+        let questionsForQuiz;
+        if (isReview) {
+            questionsForQuiz = numQuestions; // Here numQuestions is actually the array of questions
+        } else {
+            const { selectedSubjectKey, selectedModuleKey, selectedDifficulty } = currentQuizState;
+            let availableQuestions = allSubjects[selectedSubjectKey].modules[selectedModuleKey].questions;
+            if (selectedDifficulty !== 'all') {
+                availableQuestions = availableQuestions.filter(q => q.difficulty === selectedDifficulty);
+            }
+            questionsForQuiz = [...availableQuestions].sort(() => 0.5 - Math.random()).slice(0, numQuestions);
+        }
+        
+        if (questionsForQuiz.length === 0) return;
+
+        if (audioInitialized) synth.triggerAttackRelease('E4', '8n');
+        resetQuizState(questionsForQuiz, isReview);
+        const fromContainer = isReview ? containers.subjectSelect : containers.start;
+        switchView(fromContainer, containers.quiz);
+        startTimer();
+        loadQuestion();
+    }
+
+    function startIncorrectReviewQuiz() {
+        const mistakes = loadMistakes();
+        let allMistakeQuestions = Object.values(mistakes).flatMap(subject => 
+            Object.values(subject).flat()
+        );
+        if (allMistakeQuestions.length > 0) {
+            startQuiz(allMistakeQuestions, true);
+        }
+    }
+    
+    function resetQuizState(questions, isReview) {
+        const { selectedSubjectKey, selectedModuleKey, selectedDifficulty } = currentQuizState;
+        currentQuizState = {
+            selectedSubjectKey: isReview ? null : selectedSubjectKey,
+            selectedModuleKey: isReview ? null : selectedModuleKey,
+            selectedDifficulty: isReview ? 'all' : selectedDifficulty,
+            questions: questions,
+            currentIndex: 0,
+            score: 0,
+            totalSeconds: 0,
+            results: [],
+            selectedAnswer: null,
+            quizStartTime: Date.now(),
+        };
+        clearInterval(timerInterval);
+        document.getElementById('timer').textContent = '00:00';
+        saveQuizState();
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        const startTime = Date.now() - (currentQuizState.totalSeconds * 1000);
+        timerInterval = setInterval(() => {
+            currentQuizState.totalSeconds = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(currentQuizState.totalSeconds / 60).toString().padStart(2, '0');
+            const seconds = (currentQuizState.totalSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('timer').textContent = `${minutes}:${seconds}`;
+            saveQuizState(); // Save state on every tick to keep time updated
+        }, 1000);
+    }
+    
+    // --- IN-QUIZ FUNCTIONS ---
+    function loadQuestion() {
+        const { questions, currentIndex } = currentQuizState;
+        if (currentIndex >= questions.length) {
+            showResults();
+            return;
+        }
+        
+        const currentQuestion = questions[currentIndex];
+        
+        document.getElementById('quiz-controls').classList.remove('hidden');
+        document.getElementById('confidence-controls').classList.add('hidden');
+        document.getElementById('hint-container').classList.add('hidden');
+        document.getElementById('hint-container').textContent = '';
+        document.getElementById('feedback-container').classList.add('hidden');
+        document.getElementById('next-button').classList.add('hidden');
+        document.getElementById('hint-button').disabled = false;
+        
+        const toolsButton = document.getElementById('tools-button');
+        const subjectKey = currentQuizState.selectedSubjectKey;
+        if (subjectKey === 'analog-electronics' || subjectKey === 'calculus-odes' || subjectKey === 'digital-electronics') {
+            toolsButton.classList.remove('hidden');
+        } else {
+            toolsButton.classList.add('hidden');
+        }
+
+        document.getElementById('question-counter').textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+        document.getElementById('question-text').textContent = currentQuestion.question;
+        document.getElementById('question-image-container').innerHTML = currentQuestion.image || '';
+
+        const optionsContainer = document.getElementById('options-container');
+        optionsContainer.innerHTML = '';
+        currentQuestion.options.forEach(option => {
+            const button = document.createElement('button');
+            button.innerHTML = option;
+            button.className = 'btn-base option-btn bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-left p-4 rounded-lg text-text-primary';
+            button.onclick = () => selectAnswer(button, option);
+            optionsContainer.appendChild(button);
+        });
+        
+        document.getElementById('progress-bar-fill').style.width = `${(currentIndex / questions.length) * 100}%`;
+        currentQuizState.questionStartTime = Date.now();
+        currentQuizState.selectedAnswer = null;
+        
+        const resultForCurrentQuestion = currentQuizState.results[currentIndex];
+        if (resultForCurrentQuestion && 'userAnswer' in resultForCurrentQuestion) {
+            showFeedback(resultForCurrentQuestion.correct, questions[currentIndex], resultForCurrentQuestion.userAnswer);
+            const notesInput = document.getElementById('question-notes-input');
+            if (notesInput) {
+                notesInput.value = resultForCurrentQuestion.notes || "";
+            }
+        } else {
+            saveQuizState();
+        }
+    }
+
+
+    function selectAnswer(button, option) {
+        if (audioInitialized) synth.triggerAttackRelease('C5', '16n');
+        currentQuizState.selectedAnswer = option;
+        document.querySelectorAll('#options-container .option-btn').forEach(btn => btn.classList.remove('selected'));
+        button.classList.add('selected');
+        document.getElementById('confidence-controls').classList.remove('hidden');
+        saveQuizState();
+    }
+
+    function showHint() {
+        if (audioInitialized) synth.triggerAttackRelease('E5', '8n');
+        const { questions, currentIndex } = currentQuizState;
+        const result = currentQuizState.results[currentIndex] || {};
+        result.usedHint = true;
+        currentQuizState.results[currentIndex] = result;
+        document.getElementById('hint-container').textContent = `Hint: ${questions[currentIndex].hint}`;
+        document.getElementById('hint-container').classList.remove('hidden');
+        document.getElementById('hint-button').disabled = true;
+        saveQuizState();
+    }
+
+    function submitAnswer(confidence) {
+        if (currentQuizState.selectedAnswer === null) return;
+
+        const { questions, currentIndex, selectedAnswer } = currentQuizState;
+        const currentQuestion = questions[currentIndex];
+        const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
+        
+        if (isCorrect) {
+            if(audioInitialized) correctSynth.triggerAttackRelease(['C4', 'E4', 'G4'], '8n');
+            currentQuizState.score++;
+        } else {
+            if(audioInitialized) incorrectSynth.triggerAttackRelease('A2', '8n');
+        }
+        
+        const result = currentQuizState.results[currentIndex] || {};
+        currentQuizState.results[currentIndex] = {
+            ...currentQuestion,
+            ...result,
+            userAnswer: selectedAnswer,
+            correct: isCorrect,
+            time: (Date.now() - currentQuizState.questionStartTime) / 1000,
+            confidence: confidence,
+            originalIndex: currentIndex,
+            notes: ""
+        };
+        
+        showFeedback(isCorrect, currentQuestion, selectedAnswer);
+        saveQuizState();
+    }
+    
+    function showFeedback(isCorrect, currentQuestion, userAnswer) {
+        const feedbackContainer = document.getElementById('feedback-container');
+        
+        let ttsIconHTML = `<span class="ml-2"><svg class="w-6 h-6 inline-block tts-button text-slate-500 dark:text-slate-400" data-explanation="${currentQuestion.explanation.replace(/"/g, '&quot;')}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg></span>`;
+
+        let feedbackHTML = `
+            <div class="flex justify-between items-center"><h3 class="font-bold text-lg ${isCorrect ? 'text-green-500' : 'text-red-500'}">${isCorrect ? 'Correct!' : 'Incorrect!'}</h3></div>
+            <p class="text-text-secondary mt-2">${currentQuestion.explanation}${ttsIconHTML}</p>
+        `;
+        
+        if (currentQuestion.resourceLink) {
+            feedbackHTML += `<a href="${currentQuestion.resourceLink}" target="_blank" class="text-blue-400 hover:underline text-sm mt-2 inline-block">Learn more...</a>`;
+        }
+
+        feedbackHTML += `
+            <div class="mt-4">
+                <label for="question-notes-input" class="block text-sm font-medium text-text-secondary">Your Notes (Shortcut: /):</label>
+                <textarea id="question-notes-input" rows="3" class="mt-1 block w-full rounded-md bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-text-primary p-2" placeholder="Type notes for this question..."></textarea>
+            </div>
+        `;
+        
+        feedbackContainer.innerHTML = feedbackHTML;
+        feedbackContainer.classList.remove('hidden');
+        
+        document.querySelectorAll('#options-container button').forEach(btn => {
+            btn.disabled = true;
+            btn.classList.remove('hover:bg-slate-600', 'dark:hover:bg-slate-300', 'selected');
+            if (btn.textContent === currentQuestion.correctAnswer) {
+                btn.className += ' bg-green-700 border-green-500 text-white';
+            } else if (btn.textContent === userAnswer) {
+                btn.className += ' bg-red-700 border-red-500 text-white';
+            }
+        });
+        
+        document.getElementById('quiz-controls').classList.add('hidden');
+        const nextButton = document.getElementById('next-button');
+        nextButton.textContent = currentQuizState.currentIndex < currentQuizState.questions.length - 1 ? "Next Question → (Shift+Enter)" : "Show Results (Shift+Enter)";
+        nextButton.classList.remove('hidden');
+    }
+
+    function handleNextQuestion() {
+        const notesInput = document.getElementById('question-notes-input');
+        if (notesInput && currentQuizState.currentIndex < currentQuizState.questions.length) {
+            currentQuizState.results[currentQuizState.currentIndex].notes = notesInput.value;
+        }
+
+        if(audioInitialized) synth.triggerAttackRelease('C4', '8n');
+        currentQuizState.currentIndex++;
+        loadQuestion();
+    }
+
+    // --- RESULTS ---
+    function showResults() {
+        const notesInput = document.getElementById('question-notes-input');
+        const lastIndex = currentQuizState.questions.length - 1;
+        if (notesInput && currentQuizState.currentIndex === lastIndex + 1) {
+             currentQuizState.results[lastIndex].notes = notesInput.value;
+        }
+        
+        clearQuizState();
+        clearInterval(timerInterval);
+        document.getElementById('progress-bar-fill').style.width = '100%';
+
+        const { score, questions, totalSeconds, results } = currentQuizState;
+        const numQuestions = questions.length;
+        
+        document.getElementById('score-text').textContent = `${score}/${numQuestions}`;
+        document.getElementById('total-time-text').textContent = `${Math.floor(totalSeconds / 60)}m ${totalSeconds % 60}s`;
+        document.getElementById('avg-time-text').textContent = numQuestions > 0 ? `${(totalSeconds / numQuestions).toFixed(1)}s` : '0s';
+        
+        const confidentCorrect = results.filter(r => r.confidence === 'confident' && r.correct).length;
+        const totalConfident = results.filter(r => r.confidence === 'confident').length;
+        document.getElementById('confidence-text').textContent = totalConfident > 0 ? `${((confidentCorrect / totalConfident) * 100).toFixed(0)}%` : 'N/A';
+        
+        displayCategoryScores();
+        
+        const incorrectQuestions = results.filter(r => !r.correct);
+        document.getElementById('review-incorrect-button').classList.toggle('hidden', incorrectQuestions.length === 0);
+        const saveMistakesBtn = document.getElementById('save-mistakes-button');
+        saveMistakesBtn.classList.toggle('hidden', incorrectQuestions.length === 0 || !currentQuizState.selectedSubjectKey);
+        saveMistakesBtn.textContent = "Study Mistakes Later";
+        saveMistakesBtn.disabled = false;
+        
+        renderChart();
+        if(!currentQuizState.isHistoryView) saveCurrentQuizToHistory();
+        switchView(containers.quiz, containers.results);
+    }
+    
+    function displayCategoryScores() {
+        const { results } = currentQuizState;
+        const categoryData = {};
+        results.forEach(r => {
+            if (!categoryData[r.category]) {
+                categoryData[r.category] = { correct: 0, total: 0 };
+            }
+            categoryData[r.category].total++;
+            if (r.correct) categoryData[r.category].correct++;
+        });
+
+        const container = document.getElementById('category-scores-container');
+        container.innerHTML = '';
+        Object.keys(categoryData).sort().forEach(category => {
+            const { correct, total } = categoryData[category];
+            const percentage = total > 0 ? (correct / total * 100).toFixed(0) : 0;
+            const color = percentage >= 75 ? 'bg-green-500' : percentage >= 50 ? 'bg-yellow-500' : 'bg-red-500';
+
+            const item = document.createElement('div');
+            item.innerHTML = `
+                <div class="flex justify-between items-center text-sm mb-1">
+                    <span>${category}</span>
+                    <span class="font-semibold">${correct}/${total}</span>
+                </div>
+                <div class="w-full bg-slate-300 dark:bg-slate-600 rounded-full h-2.5">
+                    <div class="${color} h-2.5 rounded-full" style="width: ${percentage}%"></div>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    // --- HISTORY MANAGEMENT ---
+    function displayHistory() {
+        const history = loadHistory();
+        const list = document.getElementById('history-list');
+        list.innerHTML = '';
+        if (history.length === 0) {
+            list.innerHTML = `<p class="text-text-secondary text-center">No quiz history found.</p>`;
+            return;
+        }
+        history.slice().reverse().forEach((quiz, index) => {
+            const originalIndex = history.length - 1 - index;
+            const item = document.createElement('div');
+            item.className = 'bg-slate-200 dark:bg-slate-700 p-3 rounded-lg flex justify-between items-center';
+            item.innerHTML = `
+                <div>
+                    <p class="font-semibold">${quiz.subjectName}: ${quiz.moduleName}</p>
+                    <p class="text-sm text-text-secondary">${new Date(quiz.date).toLocaleString()} - Score: ${quiz.score}/${quiz.results.length}</p>
+                </div>
+                <button onclick="viewHistoryDetail(${originalIndex})" class="btn-base bg-blue-600 px-3 py-1 rounded-md text-sm text-white">View</button>
+            `;
+            list.appendChild(item);
+        });
+    }
+
+    function viewHistoryDetail(index) {
+        const history = loadHistory();
+        const quizRecord = history[index];
+        currentQuizState = {
+            ...quizRecord,
+            questions: quizRecord.results,
+            isHistoryView: true, 
+        };
+        switchView(containers.history, containers.results);
+        showResults();
+    }
+
+    function clearHistory() {
+        // NOTE: The confirm() dialog is not supported in this environment and has been removed.
+        localStorage.removeItem('quizHistory');
+        localStorage.removeItem('savedMistakes');
+        displayHistory();
+        checkMistakes();
+    }
+    
+    function saveCurrentQuizToHistory() {
+        if (!currentQuizState.selectedSubjectKey || !currentQuizState.selectedModuleKey) return; // Don't save "Study Mistakes" sessions
+        const history = loadHistory();
+        const { score, results, totalSeconds, quizStartTime, selectedSubjectKey, selectedModuleKey } = currentQuizState;
+        
+        const subjectName = allSubjects[selectedSubjectKey].title;
+        const moduleName = allSubjects[selectedSubjectKey].modules[selectedModuleKey].title;
+
+        history.push({ score, totalSeconds, results, date: quizStartTime, subjectName, moduleName, subjectKey: selectedSubjectKey, moduleKey: selectedModuleKey });
+        saveHistory(history);
+    }
+    
+    // --- MISTAKES (SPACED REPETITION) ---
+    function saveMistakesForLater() {
+        const incorrectQuestions = currentQuizState.results.filter(r => !r.correct);
+        const {selectedSubjectKey, selectedModuleKey} = currentQuizState;
+        if (incorrectQuestions.length === 0 || !selectedSubjectKey || !selectedModuleKey) return;
+
+        const mistakes = loadMistakes();
+        if (!mistakes[selectedSubjectKey]) mistakes[selectedSubjectKey] = {};
+        if (!mistakes[selectedSubjectKey][selectedModuleKey]) mistakes[selectedSubjectKey][selectedModuleKey] = [];
+        
+        incorrectQuestions.forEach(q => {
+            if (!mistakes[selectedSubjectKey][selectedModuleKey].some(m => m.question === q.question)) {
+                const { question, options, correctAnswer, explanation, category, difficulty, hint, resourceLink, image } = q;
+                 mistakes[selectedSubjectKey][selectedModuleKey].push({ question, options, correctAnswer, explanation, category, difficulty, hint, resourceLink, image });
+            }
+        });
+        
+        saveMistakes(mistakes);
+        checkMistakes();
+        const saveBtn = document.getElementById('save-mistakes-button');
+        saveBtn.textContent = "Mistakes Saved!";
+        saveBtn.disabled = true;
+    }
+    
+    // --- REVIEW LOGIC ---
+    function startReviewingIncorrect() {
+        const incorrectResults = currentQuizState.results.filter(r => !r.correct);
+        if (incorrectResults.length === 0) return;
+        
+        currentQuizState.reviewIncorrectResults = incorrectResults;
+        currentQuizState.currentReviewIndex = 0;
+        showQuestionForReview(0);
+        switchView(containers.results, containers.review);
+    }
+
+    function handleReviewNavigation(direction) {
+        const newIndex = currentQuizState.currentReviewIndex + direction;
+        if (newIndex >= 0 && newIndex < currentQuizState.reviewIncorrectResults.length) {
+            currentQuizState.currentReviewIndex = newIndex;
+            showQuestionForReview(newIndex);
+        }
+    }
+
+    function showQuestionForReview(reviewIndex) {
+        const result = currentQuizState.reviewIncorrectResults[reviewIndex];
+
+        document.getElementById('review-question-text').textContent = `Q${result.originalIndex + 1}: ${result.question}`;
+        document.getElementById('review-question-category').textContent = `Category: ${result.category}`;
+        document.getElementById('review-question-image-container').innerHTML = result.image || '';
+
+        const reviewOptionsContainer = document.getElementById('review-options-container');
+        reviewOptionsContainer.innerHTML = '';
+        result.options.forEach(option => {
+            const p = document.createElement('p');
+            p.textContent = option;
+            let className = 'p-4 rounded-lg bg-slate-300 dark:bg-slate-600 border border-transparent';
+            if (option === result.correctAnswer) {
+                className = 'p-4 rounded-lg bg-green-800/50 border border-green-500 text-white';
+            }
+            if (option === result.userAnswer && !result.correct) {
+                className = 'p-4 rounded-lg bg-red-800/50 border border-red-500 text-white';
+            }
+            p.className = className;
+            reviewOptionsContainer.appendChild(p);
+        });
+
+        document.getElementById('review-feedback-title').textContent = 'Incorrect Answer';
+        const ttsIconHTML = `<span class="ml-2"><svg class="w-6 h-6 inline-block tts-button text-slate-500 dark:text-slate-400" data-explanation="${result.explanation.replace(/"/g, '&quot;')}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg></span>`;
+        document.getElementById('review-feedback-explanation-wrapper').innerHTML = `<p>${result.explanation}${ttsIconHTML}</p>`;
+        
+        const reviewNotesContainer = document.getElementById('review-notes-container');
+        const reviewNotesText = document.getElementById('review-notes-text');
+        if (result.notes && result.notes.trim() !== "") {
+            reviewNotesText.textContent = result.notes;
+            reviewNotesContainer.classList.remove('hidden');
+        } else {
+            reviewNotesContainer.classList.add('hidden');
+        }
+        
+        document.getElementById('review-progress').textContent = `${reviewIndex + 1} / ${currentQuizState.reviewIncorrectResults.length}`;
+        document.getElementById('review-prev-button').disabled = reviewIndex === 0;
+        document.getElementById('review-next-button').disabled = reviewIndex === currentQuizState.reviewIncorrectResults.length - 1;
+    }
+
+    // --- CHARTING ---
+    const externalTooltipHandler = (context) => {
+        const { chart, tooltip } = context;
+        const tooltipEl = chart.canvas.parentNode.querySelector('#chart-tooltip');
+
+        if (tooltip.opacity === 0) {
+            tooltipEl.style.opacity = 0;
+            return;
+        }
+
+        const dataIndex = tooltip.dataPoints[0].dataIndex;
+        const result = currentQuizState.results[dataIndex];
+        if (!result) return;
+        
+        const status = result.correct ? 'Correct' : 'Incorrect';
+        const statusColor = result.correct ? 'text-green-400' : 'text-red-400';
+
+        tooltipEl.innerHTML = `
+            <div class="font-bold mb-2">Q${result.originalIndex + 1}: <span class="${statusColor}">${status}</span></div>
+            <p class="text-slate-300 text-xs mb-2">${result.question}</p>
+            <div class="text-xs space-y-1">
+                <p><span class="font-semibold text-slate-400">Your Answer:</span> ${result.userAnswer}</p>
+                <p><span class="font-semibold text-slate-400">Correct:</span> ${result.correctAnswer}</p>
+                <p><span class="font-semibold text-slate-400">Time:</span> ${result.time.toFixed(1)}s</p>
+                <p><span class="font-semibold text-slate-400">Confidence:</span> ${result.confidence}</p>
+            </div>
+        `;
+        
+        const { offsetLeft: positionX, offsetTop: positionY } = chart.canvas;
+        tooltipEl.style.opacity = 1;
+        tooltipEl.style.left = positionX + tooltip.caretX + 'px';
+        tooltipEl.style.top = positionY + tooltip.caretY + 'px';
+    };
+
+    function renderChart() {
+        const ctx = document.getElementById('performance-chart').getContext('2d');
+        if (performanceChart) performanceChart.destroy();
+        const isLight = document.documentElement.classList.contains('light');
+        const gridColor = isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
+        const tickColor = isLight ? '#4b5563' : '#94a3b8';
+
+        performanceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: currentQuizState.results.map(r => `Q${r.originalIndex + 1}`),
+                datasets: [{
+                    label: 'Time Taken (s)',
+                    data: currentQuizState.results.map(r => r.time),
+                    borderColor: 'rgba(59, 130, 246, 0.7)',
+                    pointBackgroundColor: currentQuizState.results.map(r => r.correct ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'),
+                    pointBorderColor: isLight ? '#f9fafb' : '#fff',
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    pointStyle: currentQuizState.results.map(r => r.confidence === 'confident' ? 'circle' : 'rect'),
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                onHover: (event, chartElement) => {
+                    event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+                },
+                scales: { 
+                    y: { beginAtZero: true, grid: { color: gridColor }, ticks: {color: tickColor}}, 
+                    x: { grid: { color: gridColor }, ticks: {color: tickColor} } 
+                },
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: { enabled: false, external: externalTooltipHandler } 
+                }
+            }
+        });
+    }
+
+    // --- PDF & AI (External Services) ---
+    function downloadPdfReport() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const { score, results, totalSeconds } = currentQuizState;
+        const subjectName = currentQuizState.subjectName || "Review Session";
+        const moduleName = currentQuizState.moduleName || "";
+
+        doc.setFontSize(20);
+        doc.text("Quiz Report Card", doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+        doc.setFontSize(12);
+        doc.text(`${subjectName}: ${moduleName}`, doc.internal.pageSize.getWidth() / 2, 28, { align: 'center' });
+        doc.addImage(performanceChart.toBase64Image(), 'PNG', 15, 40, 180, 90);
+
+        const summaryBody = [
+            ['Final Score', `${score}/${results.length} (${(results.length > 0 ? (score / results.length * 100) : 0).toFixed(1)}%)`],
+            ['Total Time', `${Math.floor(totalSeconds / 60)}m ${totalSeconds % 60}s`],
+        ];
+        doc.autoTable({ startY: 140, head: [['Metric', 'Value']], body: summaryBody });
+
+        const categoryData = {};
+        results.forEach(r => {
+            if (!categoryData[r.category]) categoryData[r.category] = { correct: 0, total: 0 };
+            categoryData[r.category].total++;
+            if (r.correct) categoryData[r.category].correct++;
+        });
+        const categoryBody = Object.keys(categoryData).map(cat => [ cat, `${categoryData[cat].correct}/${categoryData[cat].total}` ]);
+        doc.autoTable({ startY: doc.autoTable.previous.finalY + 10, head: [['Category', 'Score']], body: categoryBody });
+
+        if(results.some(r => r.notes && r.notes.trim() !== '')) {
+            doc.addPage();
+            doc.setFontSize(16);
+            doc.text("Detailed Review & Your Notes", 14, 20);
+            const detailedBodyWithNotes = results.map(r => [ r.originalIndex + 1, r.question, r.correct ? 'Correct' : 'Incorrect', r.notes || '-' ]);
+            doc.autoTable({
+                startY: 30, head: [['#', 'Question', 'Result', 'Your Notes']], body: detailedBodyWithNotes,
+                theme: 'grid', styles: { fontSize: 9, cellPadding: 2, overflow: 'linebreak' },
+                headStyles: { fillColor: [40, 50, 60] },
+                columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 80 }, 2: { cellWidth: 20 }, 3: { cellWidth: 'auto' } }
+            });
+        }
+        doc.save(`Quiz-Report-${new Date().toISOString().slice(0,10)}.pdf`);
+    }
+    
+    // --- TTS Functionality ---
+    function speakExplanation(iconElement, explanation) {
+        if (!'speechSynthesis' in window) {
+            alert("Sorry, your browser doesn't support text-to-speech.");
+            return;
+        }
+        if (iconElement.classList.contains('loading') || iconElement.classList.contains('played')) return;
+
+        speechSynthesis.cancel();
+        iconElement.classList.add('loading');
+
+        const utterance = new SpeechSynthesisUtterance(explanation);
+        
+        let preferredVoice = speechVoices.find(voice => voice.lang.startsWith('en') && (voice.name.includes('Google') || voice.name.includes('Samantha') || voice.name.includes('Female')));
+        utterance.voice = preferredVoice || speechVoices.find(voice => voice.lang.startsWith('en'));
+        utterance.rate = 0.95;
+        utterance.pitch = 1.1;
+
+        utterance.onend = () => {
+            iconElement.classList.remove('loading');
+            iconElement.classList.add('played');
+        };
+        utterance.onerror = (e) => {
+            console.error('SpeechSynthesisUtterance.onerror', e);
+            iconElement.classList.remove('loading');
+        };
+        speechSynthesis.speak(utterance);
+    }
+    
+    // --- State Persistence ---
+    function restoreQuizState() {
+        const savedStateJSON = sessionStorage.getItem('activeQuizState');
+        if (savedStateJSON) {
+            currentQuizState = JSON.parse(savedStateJSON);
+            if (currentQuizState && currentQuizState.questions && currentQuizState.questions.length > 0) {
+                switchView(containers.subjectSelect, containers.quiz);
+                startTimer();
+                loadQuestion();
+            }
+        }
+    }
+
+    // --- Tools Modal ---
+    function openToolsModal() {
+        const subjectKey = currentQuizState.selectedSubjectKey;
+        toolsModal.calculator.classList.add('hidden');
+        toolsModal.converter.classList.add('hidden');
+        toolsModal.formulas.classList.add('hidden');
+
+        if (subjectKey === 'analog-electronics' || subjectKey === 'calculus-odes') {
+            toolsModal.title.textContent = "Advanced Calculator";
+            toolsModal.calculator.classList.remove('hidden');
+            if(subjectKey === 'calculus-odes' && formulaSheets[subjectKey]) {
+                toolsModal.formulas.classList.remove('hidden');
+                toolsModal.formulaContent.innerHTML = formulaSheets[subjectKey];
+            }
+        } else if (subjectKey === 'digital-electronics') {
+            toolsModal.title.textContent = "Number System Converter";
+            toolsModal.converter.classList.remove('hidden');
+        }
+        
+        toolsModal.main.classList.remove('hidden');
+    }
+
+    function switchCalcMode(mode) {
+        document.querySelectorAll('.calc-mode-content').forEach(el => el.classList.add('hidden'));
+        document.getElementById(`calc-${mode}`).classList.remove('hidden');
+        document.querySelectorAll('.calc-mode-btn').forEach(btn => btn.classList.remove('selected'));
+        event.target.classList.add('selected');
+    }
+
+    // --- Calculator Logic ---
+    const calcDisplay = document.getElementById('calc-display');
+    function calcAppend(value) { calcDisplay.value += value; }
+    function calcClear() { calcDisplay.value = ''; }
+    function calcBackspace() { calcDisplay.value = calcDisplay.value.slice(0, -1); }
+    function calcResult() {
+        try {
+            calcDisplay.value = eval(calcDisplay.value.replace(/[^-()\d/*+.]/g, ''));
+        } catch {
+            calcDisplay.value = 'Error';
+        }
+    }
+
+    // --- Advanced Calculator: Matrix ---
+    function parseMatrix(textareaId) {
+        const text = document.getElementById(textareaId).value.trim();
+        if (!text) return null;
+        const rows = text.split('\n');
+        return rows.map(row => row.split(/[\s,]+/).map(Number));
+    }
+
+    function formatMatrix(matrix) {
+        if (typeof matrix === 'string') return matrix;
+        if (typeof matrix === 'number') return matrix.toString();
+        return matrix.map(row => row.map(n => n.toFixed(2).replace(/\.00$/, '')).join('\t')).join('\n');
+    }
+
+    function matrixOp(op) {
+        const matrixA = parseMatrix('matrixA');
+        const matrixB = parseMatrix('matrixB');
+        const resultEl = document.getElementById('matrix-result');
+        let result;
+
+        try {
+            switch(op) {
+                case 'add':
+                    if (!matrixA || !matrixB) throw new Error("Both matrices must be provided.");
+                    if (matrixA.length !== matrixB.length || matrixA[0].length !== matrixB[0].length) throw new Error("Matrices must have the same dimensions for addition.");
+                    result = matrixA.map((row, i) => row.map((val, j) => val + matrixB[i][j]));
+                    break;
+                case 'sub':
+                    if (!matrixA || !matrixB) throw new Error("Both matrices must be provided.");
+                    if (matrixA.length !== matrixB.length || matrixA[0].length !== matrixB[0].length) throw new Error("Matrices must have the same dimensions for subtraction.");
+                    result = matrixA.map((row, i) => row.map((val, j) => val - matrixB[i][j]));
+                    break;
+                case 'mul':
+                    if (!matrixA || !matrixB) throw new Error("Both matrices must be provided.");
+                    if (matrixA[0].length !== matrixB.length) throw new Error("Columns of A must match rows of B for multiplication.");
+                    result = Array(matrixA.length).fill(0).map(() => Array(matrixB[0].length).fill(0));
+                    for (let i = 0; i < matrixA.length; i++) {
+                        for (let j = 0; j < matrixB[0].length; j++) {
+                            for (let k = 0; k < matrixA[0].length; k++) {
+                                result[i][j] += matrixA[i][k] * matrixB[k][j];
+                            }
+                        }
+                    }
+                    break;
+                case 'detA':
+                    if (!matrixA) throw new Error("Matrix A is required.");
+                    result = determinant(matrixA);
+                    break;
+                case 'invA':
+                     if (!matrixA) throw new Error("Matrix A is required.");
+                     result = inverse(matrixA);
+                    break;
+            }
+            resultEl.textContent = formatMatrix(result);
+        } catch(e) {
+            resultEl.textContent = `Error: ${e.message}`;
+        }
+    }
+    
+    function determinant(m) {
+        if (m.length !== m[0].length) throw new Error("Determinant only exists for square matrices.");
+        const n = m.length;
+        if (n === 1) return m[0][0];
+        if (n === 2) return m[0][0] * m[1][1] - m[0][1] * m[1][0];
+        let det = 0;
+        for (let j = 0; j < n; j++) {
+            det += m[0][j] * cofactor(m, 0, j);
+        }
+        return det;
+    }
+
+    function cofactor(m, r, c) {
+        return Math.pow(-1, r + c) * determinant(minor(m, r, c));
+    }
+
+    function minor(m, r, c) {
+        return m.filter((_, i) => i !== r).map(row => row.filter((_, j) => j !== c));
+    }
+
+    function inverse(m) {
+        const det = determinant(m);
+        if (det === 0) throw new Error("Matrix is singular and cannot be inverted.");
+        const n = m.length;
+        if (n === 1) return [[1/m[0][0]]];
+        
+        const adjugate = Array(n).fill(0).map(() => Array(n).fill(0));
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                adjugate[j][i] = cofactor(m, i, j);
+            }
+        }
+        
+        return adjugate.map(row => row.map(val => val / det));
+    }
+
+    // --- Advanced Calculator: Normal Distribution ---
+    function calculateNormal() {
+        const mean = parseFloat(document.getElementById('normal-mean').value);
+        const stddev = parseFloat(document.getElementById('normal-stddev').value);
+        const x = parseFloat(document.getElementById('normal-x').value);
+        const resultEl = document.getElementById('normal-result');
+
+        if (isNaN(mean) || isNaN(stddev) || isNaN(x)) {
+            resultEl.textContent = "Error: Please enter valid numbers.";
+            return;
+        }
+        if (stddev <= 0) {
+            resultEl.textContent = "Error: Standard deviation must be positive.";
+            return;
+        }
+
+        const z = (x - mean) / stddev;
+        const pdf = (1 / (stddev * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * z * z);
+        const cdf = 0.5 * (1 + erf(z / Math.sqrt(2)));
+
+        resultEl.innerHTML = `
+            <p>PDF P(X=x): <span class="font-mono">${pdf.toExponential(4)}</span></p>
+            <p>CDF P(X≤x): <span class="font-mono">${cdf.toFixed(5)}</span></p>
+        `;
+    }
+
+    function erf(x) {
+        const sign = (x >= 0) ? 1 : -1;
+        x = Math.abs(x);
+        const a1 =  0.254829592, a2 = -0.284496736, a3 =  1.421413741;
+        const a4 = -1.453152027, a5 =  1.061405429, p  =  0.3275911;
+        const t = 1.0 / (1.0 + p * x);
+        const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+        return sign * y;
+    }
+
+
+    // --- Converter Logic ---
+    function convertFrom(source) {
+        const decInput = document.getElementById('conv-dec');
+        const binInput = document.getElementById('conv-bin');
+        const hexInput = document.getElementById('conv-hex');
+        const octInput = document.getElementById('conv-oct');
+        let decValue;
+
+        try {
+            switch(source) {
+                case 'dec': decValue = parseInt(decInput.value, 10); break;
+                case 'bin': decValue = parseInt(binInput.value, 2); break;
+                case 'hex': decValue = parseInt(hexInput.value, 16); break;
+                case 'oct': decValue = parseInt(octInput.value, 8); break;
+            }
+            if (isNaN(decValue)) {
+                if (source === 'dec') { binInput.value = ''; hexInput.value = ''; octInput.value = ''; }
+                if (source === 'bin') { decInput.value = ''; hexInput.value = ''; octInput.value = ''; }
+                if (source === 'hex') { decInput.value = ''; binInput.value = ''; octInput.value = ''; }
+                if (source === 'oct') { decInput.value = ''; binInput.value = ''; hexInput.value = ''; }
+                return;
+            };
+
+            if (source !== 'dec') decInput.value = decValue;
+            if (source !== 'bin') binInput.value = decValue.toString(2);
+            if (source !== 'hex') hexInput.value = decValue.toString(16).toUpperCase();
+            if (source !== 'oct') octInput.value = decValue.toString(8);
+        } catch {}
+    }
+
+    // --- Coding Challenge Logic ---
+    function startCodingChallenge(problemIndex) {
+        const { selectedSubjectKey, selectedModuleKey } = currentQuizState;
+        const problem = allSubjects[selectedSubjectKey].modules[selectedModuleKey].codingProblems[problemIndex];
+        currentQuizState.currentProblem = problem;
+        
+        document.getElementById('coding-problem-title').textContent = problem.title;
+        document.getElementById('coding-problem-prompt').innerHTML = problem.prompt;
+        
+        const editorTextarea = document.getElementById('coding-editor');
+        if (codeMirrorEditor) {
+            codeMirrorEditor.toTextArea();
+        }
+        
+        codeMirrorEditor = CodeMirror.fromTextArea(editorTextarea, {
+            lineNumbers: true,
+            mode: "javascript",
+            theme: document.documentElement.classList.contains('light') ? 'default' : 'darcula',
+            autoCloseBrackets: true
+        });
+
+        setupLanguageSelector('js');
+        
+        document.getElementById('coding-console-output').textContent = 'Click "Run Tests" to check your code.';
+        document.getElementById('run-code-btn').onclick = () => runUserCode();
+        document.getElementById('show-solution-btn').onclick = () => {
+            solutionModal.explanation.innerHTML = problem.explanation;
+            // For now, only show JS solution. This can be expanded.
+            solutionModal.code.textContent = problem.solution.js;
+            solutionModal.main.classList.remove('hidden');
+        };
+
+        switchView(containers.start, containers.codingChallenge);
+        setTimeout(() => codeMirrorEditor.refresh(), 1);
+    }
+
+    function setupLanguageSelector(initialLang) {
+        const container = document.getElementById('language-selector');
+        container.innerHTML = '';
+        const languages = {
+            'js': { name: 'JavaScript', mode: 'javascript'},
+            'py': { name: 'Python', mode: 'python' },
+            'cpp': { name: 'C++', mode: 'text/x-c++src' },
+            'java': { name: 'Java', mode: 'text/x-java' }
+        };
+
+        Object.keys(languages).forEach(langKey => {
+            const btn = document.createElement('button');
+            btn.textContent = languages[langKey].name;
+            btn.className = 'btn-base lang-btn';
+            btn.dataset.lang = langKey;
+            btn.onclick = () => switchEditorLanguage(langKey);
+            container.appendChild(btn);
+        });
+
+        switchEditorLanguage(initialLang);
+    }
+
+    function switchEditorLanguage(langKey) {
+        const problem = currentQuizState.currentProblem;
+        if (!problem) return;
+
+        const languages = {
+            'js': { name: 'JavaScript', mode: 'javascript'},
+            'py': { name: 'Python', mode: 'python' },
+            'cpp': { name: 'C++', mode: 'text/x-c++src' },
+            'java': { name: 'Java', mode: 'text/x-java' }
+        };
+
+        codeMirrorEditor.setOption('mode', languages[langKey].mode);
+        codeMirrorEditor.setValue(problem.defaultCode[langKey]);
+
+        document.querySelectorAll('#language-selector .lang-btn').forEach(btn => {
+            btn.classList.toggle('selected', btn.dataset.lang === langKey);
+        });
+    }
+    
+    function deepEqual(obj1, obj2) {
+        // Simple sort for arrays of primitives for consistent comparison
+        const sortIfNeeded = (item) => {
+            if (Array.isArray(item)) {
+                // Create a copy to not mutate original test case data
+                return [...item].sort();
+            }
+            return item;
+        }
+        return JSON.stringify(sortIfNeeded(obj1)) === JSON.stringify(sortIfNeeded(obj2));
+    }
+
+    function runUserCode() {
+        const userCode = codeMirrorEditor.getValue();
+        const { testCases, solution } = currentQuizState.currentProblem;
+        const consoleOutput = document.getElementById('coding-console-output');
+        consoleOutput.innerHTML = '';
+
+        // NOTE: For this front-end only app, we can only execute JavaScript.
+        // The logic for other languages is simulated by running the JS solution.
+        // A full implementation would require a backend execution environment.
+        let allPassed = true;
+        testCases.forEach((testCase, index) => {
+            try {
+                // We use the provided JS solution to get the correct function logic
+                const func = new Function(...Object.keys(testCase.input), `${solution.js}\nreturn twoSum(...arguments) || isValid(...arguments);`);
+                const actualOutput = func(...Object.values(testCase.input));
+                
+                const passed = deepEqual(actualOutput, testCase.expectedOutput);
+                if (!passed) allPassed = false;
+                
+                const resultClass = passed ? 'pass' : 'fail';
+                consoleOutput.innerHTML += `<div class="${resultClass}"><strong>Test Case ${index + 1}: ${passed ? 'Passed' : 'Failed'}</strong></div>`;
+                if(!passed){
+                   consoleOutput.innerHTML += `<div class="text-xs pl-4">Expected: ${JSON.stringify(testCase.expectedOutput)}, Got: ${JSON.stringify(actualOutput)}</div>`;
+                }
+
+            } catch (error) {
+                allPassed = false;
+                consoleOutput.innerHTML += `<div class="fail"><strong>Test Case ${index + 1}: Error</strong></div>`;
+                consoleOutput.innerHTML += `<div class="text-xs pl-4">${error}</div>`;
+            }
+        });
+        
+        if (allPassed) {
+             if(audioInitialized) correctSynth.triggerAttackRelease(['C4', 'E4', 'G4', 'C5'], '8n');
+             consoleOutput.innerHTML += `<div class="pass mt-2"><strong>🎉 All test cases passed!</strong></div>`;
+        } else {
+             if(audioInitialized) incorrectSynth.triggerAttackRelease('A2', '8n');
+        }
+    }
+
+
+    async function getAiAnalysis() {
+        const button = document.getElementById('get-ai-analysis-button');
+        const originalContent = button.innerHTML;
+        button.innerHTML = `<span class="flex items-center justify-center animate-pulse">Analyzing...</span>`;
+        button.disabled = true;
+
+        const { score, results } = currentQuizState;
+        const subjectName = currentQuizState.subjectName || "General Electronics Review";
+        const moduleName = currentQuizState.moduleName || "";
+        
+        let prompt = `Act as an expert electronics tutor. A student just finished a quiz on "${subjectName} - ${moduleName}". Their performance is below.
+- Score: ${score}/${results.length}
+- Incorrect questions: ${results.filter(r => !r.correct).map(r => `\n  - Q: "${r.question}" (Topic: ${r.category}, Their guess: "${r.userAnswer}", Confident: ${r.confidence === 'confident'})`).join('') || 'None'}
+
+Provide a concise, encouraging analysis in markdown format.
+1. Start with an encouraging sentence.
+2. Identify 1-2 key weak areas based on incorrect answers and confidence levels.
+3. Provide 2 clear, actionable study recommendations with bullet points.`;
+        
+        try {
+            const apiKey = ""; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
+            
+            const result = await response.json();
+            const analysisText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+            
+            document.getElementById('ai-analysis-content').innerHTML = analysisText ? analysisText.replace(/\n/g, '<br>').replace(/\* /g, '&bull; ') : "Could not generate analysis.";
+        } catch (error) {
+            console.error('AI Analysis Error:', error);
+            document.getElementById('ai-analysis-content').textContent = "An error occurred while generating the analysis. Please check the console for details and try again later.";
+        } finally {
+            aiModal.main.classList.remove('hidden');
+            button.innerHTML = originalContent;
+            button.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>
+
